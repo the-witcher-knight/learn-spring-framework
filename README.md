@@ -3,7 +3,9 @@
 table of contents
 
 1. [Java cơ bản](#java_basic) 
+
     1.1. [Tổng quan](#java_overview) 
+    
     1.2. [Cú pháp cơ bản](#java_basicsyntax)
 ------------------
 
@@ -118,7 +120,7 @@ public class FreshJuiceTest {
 
 ### Kế thừa (Inhentitance)
 
-### Interfaces 
+### Interfaces
 
 ----------------------------
 
