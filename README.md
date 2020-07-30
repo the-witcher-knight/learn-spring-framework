@@ -16,9 +16,9 @@ table of contents
 
 ![](./img/java-mini-logo.png)
 
-# Java cơ bản <a href="java_basic"></a>
+# Java cơ bản <a name="java_basic"></a>
 
-## Tổng quan <a href="java_overview"></a>
+## Tổng quan <a name="java_overview"></a>
 
 Một vài lợi thế chính của Java:
 
@@ -48,7 +48,7 @@ Java được đảm bảo là "Write Once, Run Anywhere".
 
 - **Dynamic**
 
-## Cú pháp cơ bản <a href="java_basicsyntax"></a>
+## Cú pháp cơ bản <a name="java_basicsyntax"></a>
 
 ### Chương trình đầu tiên
 
@@ -128,7 +128,7 @@ public class FreshJuiceTest {
 
 ### Interfaces
 
-## Java Object and Class <a href="java_objnclass"></a>
+## Java Object and Class <a name="java_objnclass"></a>
 
 Java là một ngôn ngữ lập trình hướng đồi tượng, Java hỗ trợ những khái niệm cơ bản sau:
 - **Polymorphism (đa hình)**
