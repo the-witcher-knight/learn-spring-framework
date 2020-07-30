@@ -1,4 +1,6 @@
-# Learn Spring Boot
+![](./img/spring-boot.png)
+
+# Learn Spring Boot Framwork
 ------------------
 table of contents
 
@@ -7,8 +9,12 @@ table of contents
     1.1. [Tổng quan](#java_overview) 
     
     1.2. [Cú pháp cơ bản](#java_basicsyntax)
+
+    1.3. [Java Object and Class](#java_objnclass)
 ------------------
 
+
+![](./img/java-mini-logo.png)
 
 # Java cơ bản <a href="java_basic"></a>
 
@@ -121,6 +127,158 @@ public class FreshJuiceTest {
 ### Kế thừa (Inhentitance)
 
 ### Interfaces
+
+## Java Object and Class <a href="java_objnclass"></a>
+
+Java là một ngôn ngữ lập trình hướng đồi tượng, Java hỗ trợ những khái niệm cơ bản sau:
+- **Polymorphism (đa hình)**
+- **Inheritance (kế thừa)**
+- **Encapsulation (tính bao đóng)**
+- **Abstraction (trừu tượng)**
+- **Classes**
+- **Objects**
+- **Instance**
+- **Method**
+- **Message Passing**
+
+### Object in Java
+
+Đối tượng phần mềm cũng có trạng thái (state) và hành vi (behavios). Trạng thái của một trường phần mềm được lưu trữ trong trường (fields) và hành vi được thể hiện thông qua các phương thức.
+
+### Classes in Java
+
+Một class là một bản thiết kế (blueprint) mà từ đó một đối tượng được tạo ra.
+Ví dụ:
+
+```java
+public class Dog {
+    String breed;
+    int age;
+    String color;
+
+    void barking(){
+
+    }
+
+    void hungry(){
+
+    }
+
+    void sleeping(){
+
+    }
+}
+```
+
+Một class có thể chứa bất kì loại biến sau:
+- Local variables: biến trong các phương thức
+- Instance variables : biến bên ngoài các phương thức được khởi tạo cùng với class và có thể truy cập từ bất kì phương thức nào.
+- Class variables: Giống instance variables nhưng có từ khóa static.
+
+### Constructors
+
+Là một chủ đề quan trọng trong một class, nếu không được viết rõ ràng Java compiler sẻ tạo ra một default constructors cho class.
+
+Mỗi khi một đối tượng mới được tạo, có ít nhất một constructor được gọi. Constructor sẻ được đặt cùng tên với class và mỗi class có thể có nhiều hơn 1 constructor.
+
+Ví dụ:
+```java
+public class Dog{
+
+    public Dog(String name){
+        // Constructor này có một tham số, name
+    }
+}
+```
+
+Java cũng hỗ trợ *Singleton Class* nơi bạn chỉ có thể tạo một đối tượng của 1 class.
+
+### Java - how to use singleton class
+
+Mục đích của singleton class là giới hạn việc tạo đối tượng còn 1.
+
+Vì chỉ có một phiên bản singleton, bất kì instance fields của một singleton sẻ chỉ xảy ra một lần trên mỗi lớp, giống như các trường static. Singleton thường điều khiển việc truy cập vào các tài nguyên, chẳng hạn như kết nối CSDL hoặc sockets.
+
+Ví dụ, nếu bạn chỉ có mỗi một giấy phép (license) cho duy nhất một kết nối tới database hoặc trình điều khiển của bạn gặp sự cố với đa luồng (multithreading), singleton đảm bảo rằng chỉ có duy nhất một kết nối được tạo ra hoặc chỉ có duy nhất một luồng được có thể truy cập kết nối tại một thời điểm.
+
+#### Thực thi singleton
+
+Ví dụ 1:
+
+Cách thực hiện dễ nhất bao gồm 1 private contructor, một field để giử kết quả và một phương thức truy cập static như getInstance().
+
+Private field có thể được chỉ định từ trong 1 static initializer block hoặc đơn giản hơn sử dụng initializer. Phương thức getInstance() (phải public) sau đó chỉ cần trả về thể hiện này.
+
+```java
+// File name: Singleton.java
+public class Singleton{
+
+    private static Singleton singleton = new Singleton( );
+
+   /* 
+    * A private Constructor ngăn chặn bất kỳ lớp nào khác khởi tạo
+    */
+   private Singleton() { }
+
+   /* Static 'instance' method */
+   public static Singleton getInstance( ) {
+      return singleton;
+   }
+
+   /* Other methods protected by singleton-ness */
+   protected static void demoMethod( ) {
+      System.out.println("demoMethod for singleton");
+   }
+}
+```
+
+Ví dụ 2:
+
+```java
+public class ClassicSingleton {
+
+   private static ClassicSingleton instance = null;
+   private ClassicSingleton() {
+      // Exists only to defeat instantiation.
+   }
+
+   public static ClassicSingleton getInstance() {
+      if(instance == null) {
+         instance = new ClassicSingleton();
+      }
+      return instance;
+   }
+}
+```
+Lớp ClassicSingleton sử dụng một kỹ thuật được gọi là khởi tạo lười biếng để tạo ra singleton; kết quả là, cá thể singleton không được tạo cho đến khi phương thức getInstance () được gọi lần đầu tiên. Kỹ thuật này đảm bảo rằng các phiên bản singleton chỉ được tạo khi cần thiết.
+
+### Tạo một đối tượng
+
+Về cơ bản, một đối tượng được tạo ra từ một class. Trong Java, `new` là từ khóa được sử dụng để tạo mới 1 đối tượng.
+
+Dưới đây là 3 bước để tạo 1 đối tượng.
+- Declaration
+- Instantiation: dùng `new` để tạo mới 1 đối tượng
+- Initialization
+
+Ví dụ:
+
+```java
+Live Demo
+public class Puppy {
+   public Puppy(String name) {
+      // This constructor has one parameter, name.
+      System.out.println("Passed Name is :" + name );
+   }
+
+   public static void main(String []args) {
+      // dòng lệnh sau tạo 1 đối tượng tên có name = tommy
+      Puppy myPuppy = new Puppy( "tommy" );
+   }
+}
+```
+
+
 
 ----------------------------
 
