@@ -278,6 +278,147 @@ public class Puppy {
 }
 ```
 
+### Truy cập các biến và phương thức sơ thẩm
+
+Các biến và các phương thức được kết nối thông qua các đối tượng được tạo. Ví dụ như sau:
+
+```java
+// Đầu tiên, tạo một đối tượng
+ObjectReference = new Constructor();
+
+// Bây giờ, gọi 1 biến như sau:
+ObjectReference.variableName;
+
+// Và gọi một phương thức như sau
+ObjectReference.MethodName();
+```
+
+Ví dụ:
+
+```java
+public class Puppy{
+   int age;
+
+   public Puppy(String name){
+      System.out.println("Name chosen is:" + name); 
+   }
+
+   public void setAge(int age){
+      this.age = age;
+   }
+
+   public int getAge(){
+      System.out.println("Puppy age is:"+age);
+      return age;
+   }
+
+   public static void main(String []args) {
+      /* Tạo đối tượng */
+      Puppy myPuppy = new Puppy( "tommy" );
+
+      /* Gọi phương thức set age của class */
+      myPuppy.setAge( 2 );
+
+      /* gọi phương thức khác của class để get age */
+      myPuppy.getAge( );
+
+      /* Truy cập biến thể hiện (instance variable) của class */
+      System.out.println("Variable Value :" + myPuppy.age );
+   }
+}
+```
+
+### Quy tắc khai báo tệp nguồn
+
+Các quy tắc này rất cần thiết khi khai báo *class*, *import* các câu lệnh và báo cáo *package* trong source file.
+
+- Chỉ có thể có duy nhất 1 public class mỗi source file
+
+- Một source file có thể có nhiều non-public class
+
+- Tên của class public cũng là tên của source file. Ví dụ, tên class là Employee{} thì tên source file là Employee.java.
+
+- Nếu class được định nghĩa bên trong một package thì câu lệnh package sẽ là câu lệnh đầu tiên trong tệp nguồn.
+
+- Nếu báo cáo nhập khẩu có mặt, thì chúng phải được viết giữa câu lệnh gói và khai báo lớp. Nếu không có câu lệnh gói, thì câu lệnh nhập phải là dòng đầu tiên trong tệp nguồn.
+
+- Các câu lệnh nhập và gói sẽ ngụ ý tất cả các lớp có trong tệp nguồn. Không thể khai báo các câu lệnh nhập và / hoặc gói khác nhau cho các lớp khác nhau trong tệp nguồn.
+
+### Java package
+
+Nói đơn giản, nó là một cách để phân loại các lớp và các interfaces. 
+
+### Import các câu lệnh
+
+Trong Java nếu một tên đủ điều kiện, bao gồm gói và tên lớp được đưa ra, thì trình biên dịch có thể dễ dàng định vị mã nguồn hoặc các lớp. Import câu lệnh là một cách đưa ra vị trí thích hợp cho trình biên dịch tìm lớp cụ thể đó.
+
+```java
+import java.io.*;
+```
+
+### Một nghiên cứu trường hợp đơn giản
+
+```java
+import java.io.*;
+public class Employee {
+
+   String name;
+   int age;
+   String designation;
+   double salary;
+
+   // This is the constructor of the class Employee
+   public Employee(String name) {
+      this.name = name;
+   }
+
+   // Assign the age of the Employee  to the variable age.
+   public void empAge(int empAge) {
+      age = empAge;
+   }
+
+   /* Assign the designation to the variable designation.*/
+   public void empDesignation(String empDesig) {
+      designation = empDesig;
+   }
+
+   /* Assign the salary to the variable	salary.*/
+   public void empSalary(double empSalary) {
+      salary = empSalary;
+   }
+
+   /* Print the Employee details */
+   public void printEmployee() {
+      System.out.println("Name:"+ name );
+      System.out.println("Age:" + age );
+      System.out.println("Designation:" + designation );
+      System.out.println("Salary:" + salary);
+   }
+}
+```
+
+```java
+import java.io.*;
+public class EmployeeTest {
+
+   public static void main(String args[]) {
+      /* Create two objects using constructor */
+      Employee empOne = new Employee("James Smith");
+      Employee empTwo = new Employee("Mary Anne");
+
+      // Invoking methods for each object created
+      empOne.empAge(26);
+      empOne.empDesignation("Senior Software Engineer");
+      empOne.empSalary(1000);
+      empOne.printEmployee();
+
+      empTwo.empAge(21);
+      empTwo.empDesignation("Software Engineer");
+      empTwo.empSalary(500);
+      empTwo.printEmployee();
+   }
+}
+```
 
 
 ----------------------------
