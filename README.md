@@ -11,6 +11,8 @@ table of contents
     1.2. [Cú pháp cơ bản](#java_basicsyntax)
 
     1.3. [Java Object and Class](#java_objnclass)
+
+    1.4. [Java basic datatype](#java_basicdatatype)
 ------------------
 
 
@@ -396,7 +398,7 @@ public class Employee {
    }
 }
 ```
-   
+
 ```java
 import java.io.*;
 public class EmployeeTest {
@@ -419,6 +421,54 @@ public class EmployeeTest {
    }
 }
 ```
+## Cách kiểu dữ liệu cơ bản <a name="java_basicdatatype"></a>
+
+Trong Java có 2 kiểu dữ liệu là kiểu dữ liệu thông thường và các kiểu dữ liệu tham chiếu/đối tượng.
+
+### Các kiểu dữ liệu thông thường
+
+- **byte** số nguyên 8-bit
+- **short** số nguyên 16-bit 
+- **int** số nguyên 32-bit  
+- **long** số nguyên 64-bit
+- **float** số thực chấm động 32-bit
+- **double** số thực chấm động 64-bit
+- **boolean**
+- **char** kí tự 16-bit UNICODE
+
+### Kiểu dữ liệu tham chiếu/đối tượng
+
+### Java literals
+
+Một literal là một source code đại diện cho giá trị cố định. Chúng được biểu diễn trực tiếp trong mã mà không có bất kì tính toán nào.
+
+Literal có thể gán cho bất kì loại biến nào. `byte a = 68; char a = 'A'`.
+
+byte, int, long và short có thể được biểu thị bằng các hệ số thập phân (cơ số 10), thập lục phân (cơ số 16) hoặc bát phân (cơ số 8).
+
+Tiền tố 0 được sử dụng để chỉ số bát phân và tiền tố 0x biểu thị hệ thập lục phân khi sử dụng các hệ thống số này cho các literal,
+
+```java
+int decimal = 100;
+int octal = 0144;
+int hexa =  0x64;
+```
+
+Ngôn ngữ Java cũng hỗ trợ một vài chuỗi thoát đặc biệt cho String và char.
+
+|Notation|Character represented
+|-|-|
+|\n|Newline (0x0a)|
+|\r|Carriage return (0x0d)|
+|\f|Formfeed (0x0c)|
+|\b|Backspace (0x08)|
+|\s|Space (0x20)|
+|\t|tab|
+|\\"|"|
+|\\'|'|
+|\\\\ |\|
+|\ddd|Octal character (ddd)|
+|\uxxxx|Hexadecimal UNICODE character (xxxx)|
 
 
 ----------------------------
