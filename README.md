@@ -13,6 +13,8 @@ table of contents
     1.3. [Java Object and Class](#java_objnclass)
 
     1.4. [Java basic datatype](#java_basicdatatype)
+
+    1.5. [Java variable types](#java_variabletype)
 ------------------
 
 
@@ -470,6 +472,33 @@ Ngôn ngữ Java cũng hỗ trợ một vài chuỗi thoát đặc biệt cho St
 |\ddd|Octal character (ddd)|
 |\uxxxx|Hexadecimal UNICODE character (xxxx)|
 
+### Java variable types
+
+`datatype variable [ = value][, variable [ = value] ...] ;`
+
+#### Local variables
+
+#### Instance variables
+
+- Khi một không gian được phân bổ cho một đối tượng trong heap, một vị trí cho mỗi giá trị biến đối tượng được tạo.
+
+- Biến sơ thẩm được tạo khi một đối tượng được tạo với việc sử dụng từ khóa 'mới' và bị hủy khi đối tượng bị hủy.
+
+- Các biến sơ thẩm giữ các giá trị phải được tham chiếu bởi nhiều hơn một phương thức, hàm tạo hoặc khối hoặc các phần thiết yếu của trạng thái của một đối tượng phải có trong toàn bộ lớp
+
+#### Class/Static variables
+
+- Sẽ chỉ có một bản sao của mỗi biến lớp cho mỗi lớp, bất kể có bao nhiêu đối tượng được tạo từ nó.
+
+- Các biến tĩnh hiếm khi được sử dụng ngoài việc được khai báo là hằng số. Các hằng số là các biến được khai báo là public / private, final và static. Các biến không đổi không bao giờ thay đổi từ giá trị ban đầu của chúng.
+
+- Các biến tĩnh được lưu trữ trong bộ nhớ tĩnh. Rất hiếm khi sử dụng các biến tĩnh khác với khai báo cuối cùng và được sử dụng như là hằng số công khai hoặc riêng tư.
+
+- Biến tĩnh được tạo khi chương trình khởi động và hủy khi chương trình dừng.
+
+- Khả năng hiển thị tương tự như các biến thể hiện (instance variable). Tuy nhiên, hầu hết các biến tĩnh được khai báo công khai vì chúng phải có sẵn cho người dùng của lớp.
+
+- Khi khai báo các biến lớp là public static final, thì các tên biến (hằng) đều ở dạng chữ hoa. Nếu các biến tĩnh không public và final, cú pháp đặt tên giống như các biến thể hiện và biến cục bộ.
 
 ----------------------------
 
