@@ -12,9 +12,15 @@ table of contents
 
     1.3. [Java Object and Class](#java_objnclass)
 
-    1.4. [Java basic datatype](#java_basicdatatype)
+    1.4. [Java basic datatype](#java_basicdatatypes)
 
-    1.5. [Java variable types](#java_variabletype)
+    1.5. [Java variable types](#java_variabletypes)
+
+    1.6. [Java modifier types](#java_modifiertypes)
+
+    1.7. [Java loop](#java_loop)
+
+    1.8. [Java date](#java_date)
 ------------------
 
 
@@ -423,7 +429,7 @@ public class EmployeeTest {
    }
 }
 ```
-## Cách kiểu dữ liệu cơ bản <a name="java_basicdatatype"></a>
+## Cách kiểu dữ liệu cơ bản <a name="java_basicdatatypes"></a>
 
 Trong Java có 2 kiểu dữ liệu là kiểu dữ liệu thông thường và các kiểu dữ liệu tham chiếu/đối tượng.
 
@@ -500,6 +506,79 @@ Ngôn ngữ Java cũng hỗ trợ một vài chuỗi thoát đặc biệt cho St
 
 - Khi khai báo các biến lớp là public static final, thì các tên biến (hằng) đều ở dạng chữ hoa. Nếu các biến tĩnh không public và final, cú pháp đặt tên giống như các biến thể hiện và biến cục bộ.
 
+### Java modifier types <a name="java_modifiertypes"></a>
+
+Có 2 loại access modify và non-access
+
+Ví dụ,
+```java
+public class className {
+   // ...
+}
+
+private boolean myFlag;
+static final double weeks = 9.5;
+protected static final int BOXWIDTH = 42;
+
+public static void main(String[] arguments) {
+   // body of method
+}
+```
+
+#### Access Control Modifiers
+
+Java cung cấp một số access modifier để đặt mức truy cập cho các class, variable, method và constructor. Có 4 mức truy cập:
+
+- Hiển thị với package, mặc định.
+- Chỉ hiển thị trong class (private).
+- Hiển thị (public).
+- Hiển thị với gói và tất cả các class con (protected).
+
+#### Non-Access Modifier.
+
+Java cung cấp một số non-access modifier để đạt được nhiều chức năng khác.
+
+- static modifier để tạo các phương thức và biến lớp.
+- final modifier để hoàn thiện việc triển khai các lớp, phương thức và biến.
+- abstract modifier để tạo các lớp và phương thức trừu tượng.
+- synchronized (đồng bộ) và volatile (bay hơi), được sử dụng cho các luồng.
+
+### Java loop
+
+Cũng ik mấy ngôn ngữ bình thường nhưng có thêm vụ này:
+
+```java
+int[] numbers = {1,2,3,4,5,6};
+
+for(int i : numbers){
+   System.out.println("so:" + i);
+}
+```
+
+### Java date
+
+Java cung cấp lớp Date có sẵn trong gói java.util, lớp này gói gọn ngày và giờ hiện tại.
+
+class Date hỗ trợ 2 constructor 
+
+- Date(): constructor này khởi tạo đối tượng với ngày và giờ hiện tại.
+- Date(long millisec): constructor này chấp nhận một đối số bằng với số mili giây đã trôi qua kể từ nửa đêm, ngày 1 tháng 1 năm 1970.
+
+Ví dụ lấy ngày giờ hiện tại:
+
+```java
+import java.util.Date;
+public class DateDemo {
+
+   public static void main(String args[]) {
+      // Instantiate a Date object
+      Date date = new Date();
+
+      // display time and date using toString()
+      System.out.println(date.toString());
+   }
+}
+```
 ----------------------------
 
 ----------------------------
