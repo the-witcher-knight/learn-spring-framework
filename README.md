@@ -26,6 +26,12 @@ table of contents
 
     1.20. [Java regular expressions](#java_expressions)
 
+2. [Java hướng đối tượng](#java_oop)
+
+   2.1. [Kế thừa](#java_inheritance)
+
+
+
 ------------------
 
 
@@ -602,6 +608,78 @@ arrayRefVar = new dataType[arraySize];
 #### Array class
 
 java.util.Arrays;
+
+# Java hướng đối tượng <a name="java_oop"></a>
+
+## Kế thừa <a name="java_inheritance"></a>
+
+Kế thừa có thể được định nghĩa là quá trình mà một lớp có được các thuộc tính (các phương thức và các trường) của lớp khác. Việc sử dụng kế thừa thông tin được quản lý theo một thứ tự phân cấp.
+
+Lớp kế thừa các thuộc tính của lớp khác được gọi là lớp con (subclass) (lớp dẫn xuất (devired class), lớp con (child class)).
+
+### Từ khóa extends 
+
+`extends` là từ khóa được sử dụng để kế thừa thuộc tính của 1 class. Cú pháp như sau:
+
+```java
+class Animal{
+   ....
+   ....  
+}
+
+class Dog extends Animal{
+   ....
+   ....
+}
+```
+
+### Ví dụ
+
+```java
+class Calculation {
+   int z;
+	
+   public void addition(int x, int y) {
+      z = x + y;
+      System.out.println("The sum of the given numbers:"+z);
+   }
+	
+   public void Subtraction(int x, int y) {
+      z = x - y;
+      System.out.println("The difference between the given numbers:"+z);
+   }
+}
+
+public class My_Calculation extends Calculation {
+   public void multiplication(int x, int y) {
+      z = x * y;
+      System.out.println("The product of the given numbers:"+z);
+   }
+	
+   public static void main(String args[]) {
+      int a = 20, b = 10;
+      My_Calculation demo = new My_Calculation();
+      demo.addition(a, b);
+      demo.Subtraction(a, b);
+      demo.multiplication(a, b);
+   }
+}
+```
+
+### Từ khóa super
+
+Từ khóa `super` cũng tương tự như từ khóa `this`. Các tình huống mà từ khóa `super` được sử dụng:
+
+- Dùng để phân biệt các thành viên của `super class` với các thành viên của `subclass` nếu chúng có cùng tên
+
+- Dùng để gọi constructor của super class từ subclass.
+
+#### Phân biệt các thành viên
+
+```java
+super.variable;
+super.method();
+```
 
 ----------------------------
 
