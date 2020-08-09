@@ -21,6 +21,11 @@ table of contents
     1.7. [Java loop](#java_loop)
 
     1.8. [Java date](#java_date)
+
+    1.9. [Java array](#java_array)
+
+    1.20. [Java regular expressions](#java_expressions)
+
 ------------------
 
 
@@ -579,6 +584,25 @@ public class DateDemo {
    }
 }
 ```
+
+### Java array
+
+#### Khai báo biến mảng
+
+```java
+dataType[] arrayRefVar;
+```
+
+#### Tạo mảng
+
+```java
+arrayRefVar = new dataType[arraySize];
+```
+
+#### Array class
+
+java.util.Arrays;
+
 ----------------------------
 
 ----------------------------
