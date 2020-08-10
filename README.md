@@ -681,6 +681,109 @@ super.variable;
 super.method();
 ```
 
+#### Gọi constructor của superclass
+
+Nếu 1 lớp đang kế thừa một lớp khác, subclass sẽ tự động lấy constructor của superclass. Dùng từ khóa super để gọi parameterized constructor của superclass.
+
+```java
+super(values);
+```
+
+#### Ví dụ
+
+```java
+class Superclass {
+   int age;
+
+   Superclass(int age) {
+      this.age = age; 		 
+   }
+
+   public void getAge() {
+      System.out.println("The value of the variable named age in super class is: " +age);
+   }
+}
+
+public class Subclass extends Superclass {
+   Subclass(int age) {
+      super(age);
+   }
+
+   public static void main(String args[]) {
+      Subclass s = new Subclass(24);
+      s.getAge();
+   }
+}
+```
+
+### IS-A Relationship
+
+`This object is a type of that object`, ví dụ như vầy:
+
+```java
+public class Animal {
+}
+
+public class Mammal extends Animal {
+}
+
+public class Reptile extends Animal {
+}
+
+public class Dog extends Mammal {
+}
+```
+
+Như vậy, ta nói:
+
+- Mammal IS-A Animal
+- Reptile IS-A Animal
+- Dog IS-A Mammal
+- Hence: Dog IS-A Animal as well
+
+### Từ khóa intanceof
+
+Dùng từ khóa `intanceof` để kiểm tra class này có thuộc class kia hay không.
+
+```java
+interface Animal{}
+class Mammal implements Animal{}
+
+public class Dog extends Mammal {
+
+   public static void main(String args[]) {
+      Mammal m = new Mammal();
+      Dog d = new Dog();
+
+      System.out.println(m instanceof Animal);
+      System.out.println(d instanceof Mammal);
+      System.out.println(d instanceof Animal);
+   }
+}
+```
+
+### HAS-A relationship
+
+Các mối quan hệ này chủ yếu dựa trên cách sử dụng. 
+
+```java
+public class Vehicle{}
+public class Speed{}
+
+public class Van extends Vehicle {
+   private Speed sp;
+} 
+```
+
+### Kiểu của kế thừa
+
+![](./img/types_of_inheritance.jpg)
+
+Tuy nhiên, java không hổ trợ đa kế thừa (multiple inheritance). Điều này có nghĩa là một class không thể extends nhiều hơn 1 class.
+
+Tuy nhiên, một class có thể triển khai được nhiều giao diện, điều này giúp java thoát khỏi tình trạng đa kế thừa bất khả thi.
+
+
 ----------------------------
 
 ----------------------------
