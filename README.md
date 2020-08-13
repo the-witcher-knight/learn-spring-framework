@@ -1,6 +1,4 @@
-![](./img/spring-boot.png)
 
-# Learn Spring Boot Framwork
 ------------------
 table of contents
 
@@ -42,6 +40,9 @@ table of contents
 
    2.7. [Package](#java_package)
 
+3. [Spring boot](#java_springboot)
+
+   3.1. [Các khái niệm cần nắm](#spring_other)
 
 ------------------
 
@@ -1343,15 +1344,155 @@ Một giao diện không có phương thức nào được gọi là `tagging in
 - `Adds a data type to a class`: Tình huống này là nguồn gốc của thuật ngữ, gắn thẻ. Một lớp thực hiện giao diện gắn thẻ không cần xác định bất kỳ phương thức nào (vì giao diện không có bất kỳ phương thức nào), nhưng lớp này trở thành một kiểu giao diện thông qua tính đa hình.
 
 ### Java package <a name="java_package"></a>
+--------------------------------------------
+-----------------------------------------------------------------------------------
+
+![](./img/spring-boot.png)
 
 
+# Learn Spring Boot Framwork
+
+## Các khái niệm cần nắm <a name="java_other></a>
+
+### Khái niệm tight-coupling (liên kết ràng buộc) và cách loosely coupled (liên kết lỏng lẻo)
+
+`tight-coupling` hay "liên kết ràng buộc" là một khái niệm trong Java ám chỉ việc mối quan hệ giữa các Class quá chặt chẽ. Khi yêu cầu thay đổi logic hay một class bị lỗi sẽ dẫn tới ảnh hưởng tới toàn bộ các Class khác.
+
+`loosely-coupled` là cách ám chỉ việc làm giảm bớt sự phụ thuộc giữa các Class với nhau.
+
+#### Ví dụ
+
+1. Các code level 1
+
+```java
+public class BubbleSortAlgorithm{
+   public void sort(int[] array) {
+      // TODO: Add your logic here
+      System.out.println("Đã sắp xếp bằng thuật toán sx nổi bọt");
+   }
+}
+
+public class VeryComplexService {
+   private BubbleSortAlgorithm bubbleSortAlgorithm = new BubbleSortAlgorithm();
+
+   public VeryComplexService(){
+   }
+
+   public void complexBusiness(int array[]){
+      bubbleSortAlgorithm.sort(array);
+      // TODO: more logic here
+   }
+}
+```
+
+Với cách làm ở trên, `VeryComplexService` đã hoàn thiện được nhiệm vụ, tuy nhiên, khi có yêu cầu thay đổi thuật toán sắp xếp sang QuickSort thì nghe vẻ chúng ta sẽ phải sửa lại hoàn toàn cả 2 Class trên.
+
+Ngoài ra `BubbleSortAlgorithm` sẽ chỉ tồn tại nếu `VeryComplexService` tồn tại, vì `VeryComplexService` tạo đối tượng `BubbleSortAlgorithm` bên trong nó (hay nói cách khác là sự sống chết của `BubbleSortAlgorithm` sẽ do `VeryComplexService` quyết định), theo như cách implement này, nó là liên kết rất chặt với nhau.
+
+2. Cách code level 2
+
+```java
+public interface SortAlgorithm {
+    /**
+     * Sắp xếp mảng đầu vào
+     * @param array
+     */
+    public void sort(int array[]);
+}
+
+public class BubbleSortAlgorithm implements SortAlgorithm{
+
+    @Override
+    public void sort(int[] array) {
+        // TODO: Add your logic here
+        System.out.println("Đã sắp xếp bằng thuật toán sx nổi bọt");
+    }
+}
 
 
+public class VeryComplexService {
+    private SortAlgorithm sortAlgorithm;
+    public VeryComplexService(){
+        sortAlgorithm = new BubbleSortAlgorithm();
+    }
 
+    public void complexBusiness(int array[]){
+        sortAlgorithm.sort(array);
+        // TODO: more logic here
+    }
+}
+```
 
---------------------------
+Với cách làm này, `VeryComplexService` sẽ chỉ quan hệ với một interface `SortAlgorithm`. Với cách này thì mỗi quan hệ giảm bớt sự liên kết, nhưng nó không thay đổi được việc thuật toán vẫn đang là `BubbleSortAlgorithm`.
 
+3. Cách code level 3
 
-----------------------------
+```java
+public interface SortAlgorithm {
+   /**
+   * Sắp xếp mảng đầu vào
+   * @param array
+   */
+   public void sort(int array[]);
+}
 
-# Khái niệm tight-coupling (liên kết ràng buộc) và cách loosely coupled
+public class BubbleSortAlgorithm implements SortAlgorithm{
+
+   @Override
+   public void sort(int[] array) {
+      // TODO: Add your logic here
+      System.out.println("Đã sắp xếp bằng thuật toán sx nổi bọt");
+   }
+}
+
+public class QuicksortAlgorithm implements SortAlgorithm {
+   @Override
+   public void sort(int[] array) {
+      // TODO: Add your logic here
+      System.out.println("Đã sắp xếp bằng thuật sx nhanh");
+   }
+}
+
+public class VeryComplexService {
+   private SortAlgorithm sortAlgorithm;
+   public VeryComplexService(SortAlgorithm sortAlgorithm){
+      this.sortAlgorithm = sortAlgorithm;
+   }
+
+   public void complexBusiness(int array[]){
+      sortAlgorithm.sort(array);
+      // TODO: more logic here
+   }
+}
+
+public static void main(String[] args) {
+   SortAlgorithm bubbleSortAlgorithm = new BubbleSortAlgorithm();
+   SortAlgorithm quickSortAlgorithm = new QuicksortAlgorithm();
+   VeryComplexService business1 = new VeryComplexService(bubbleSortAlgorithm);
+   VeryComplexService business2 = new VeryComplexService(quickSortAlgorithm);
+}
+```
+
+Cách thứ ba này cũng là cách làm phổ biển nhất. Mối liên hệ giữa 2 Class đã "lỏng lẻo" hơn trước rất nhiều. `VeryComplexService` sẽ không quan tâm tới việc thuật toán sắp xép là gì nữa, mà chỉ cần tập trung vào nghiệp vụ. Còn `SortAlgorithm` sẽ được đưa vào từ bên ngoài tùy theo nhu cầu sử dụng.
+
+### Tiêm phụ thuộc (dependency injection) và IoC (Inversion of Control) 
+
+1. DI
+
+> Các class không nên phụ thuộc vào các kế thừa cấp thấp mà nên phụ thuộc vào class abstraction.
+
+`Dependency Injection` là việc các Object nên phụ thuộc vào các Abstract Class và thể hiện chi tiết của nó sẽ được Inject vào đối tượng lúc runtime.
+
+Các cách để Inject dependency vào một đối tượng có thể kể đến như sau:
+
+- Constructor Injection: Cái này chính là ví dụ của mình, tiêm dependency ngay vào Contructor cho tiện.
+
+- Setter Injection: Ồ, sao không chứ 😗 chúng ta học về Setter từ những bài học vỡ lòng rồi, quá hợp lý. Xài girl.setOutfit(new Naked()) 😈
+
+- Interface Injection: Mỗi Class muốn inject cái gì, thì phải implement một Interface có chứa một hàm inject(xx) (Gần như thay thế cho setter ý bạn). Rồi bạn muốn inject gì đó thì gọi cái hàm inject(xx) ra. Cách này hơi dài và khó cho người mới.
+
+2. IoC
+
+> Inversion of Control is a programming principle. flow of control within the application is not controlled by the application itself, but rather by the underlying framework.
+
+Ta định nghĩa trước toàn bộ các `dependency` có trong Project, mô tả nó và tống nó vào 1 cái kho và giao cho một thằng tên là `framework` quản lý. Bất kỳ các `Class` nào khi khởi tạo, nó cần `dependency` gì, thì cái `framework` này sẽ tự tìm trong kho rồi `inject` vào đối tượng thay chúng ta.
