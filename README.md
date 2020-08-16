@@ -44,6 +44,10 @@ table of contents
 
    3.1. [Các khái niệm cần nắm](#spring_other)
 
+   3.2. [Cách cài đặt](#spring_install)
+
+   3.2. [@Component và @Autowired](#springboot_1)
+
 ------------------
 
 
@@ -1496,3 +1500,183 @@ Các cách để Inject dependency vào một đối tượng có thể kể đ�
 > Inversion of Control is a programming principle. flow of control within the application is not controlled by the application itself, but rather by the underlying framework.
 
 Ta định nghĩa trước toàn bộ các `dependency` có trong Project, mô tả nó và tống nó vào 1 cái kho và giao cho một thằng tên là `framework` quản lý. Bất kỳ các `Class` nào khi khởi tạo, nó cần `dependency` gì, thì cái `framework` này sẽ tự tìm trong kho rồi `inject` vào đối tượng thay chúng ta.
+
+## Cách cài đặt <a name="spring_install"></a>
+
+1. Tạo một Spring boot project 
+
+Vào https://start.spring.io/ tạo 1 project . Ở đây sử dụng `maven` và package là `com.example.blog`
+
+Nếu trong `Java` truyền thống, khi chạy cả một project, chúng ta sẽ phải định nghĩa một hàm `main()` và để nó khởi chạy đầu tiên.
+
+Thì **Spring Boot** cũng vậy, chúng ta sẽ phải chỉ cho **Spring Boot** biết nơi nó khởi chạy lần đầu, để nó cài đặt mọi thứ.
+
+Cách thực hiện là thêm annotation `@SpringBootApplication` trên class chính và gọi `SpringApplication.run(BlogApplication.class, args);` để chạy project.
+
+```java
+package com.example.blog;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class BlogApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(BlogApplication.class, args);
+	}
+}
+```
+
+Một trong những nhiệm vụ chính của Spring là tạo ra một cái Container chứa các Dependency cho chúng ta.
+
+`SpringApplication.run(BlogApplication.class, args);` chính là câu lệnh *để tạo ra* **container**. Sau đó nó *tìm toàn bộ* các **dependency** trong project của bạn và đưa vào đó.
+
+Spring đặt tên cho **container** là ***ApplicationContext***
+
+và đặt tên cho các **dependency** là ***Bean***
+
+
+## Hướng dẫn @Component và @Autowired <a name="springboot_1"></a>
+
+`@Component` và `@Autowire` là 2 annotation (chú thích) cơ bản trong Spring boot.
+
+1. @Component là một Annotation đánh dấu trên các `class` để giúp **Spring** biết đó là một `bean`.
+
+Ví dụ:
+
+Ta có một interface `outfit`
+
+```java
+public interface Outfit {
+   public void wear();
+}
+```
+
+implement nó là Class `Bikini`
+
+```java
+/*
+ Đánh dấu class bằng @Component
+ Class này sẽ được Spring Boot hiểu là một Bean (hoặc dependency)
+ Và sẽ được Spring Boot quản lý
+*/
+@Component
+public class Bikini implements Outfit {
+   @Override
+   public void wear() {
+      System.out.println("Mặc bikini");
+   }
+}
+```
+
+Và chạy chương trình
+```java
+@SpringBootApplication
+public class App {
+   public static void main(String[] args) {
+      // ApplicationContext chính là container, chứa toàn bộ các Bean
+      ApplicationContext context = SpringApplication.run(App.class, args);
+
+      // Khi chạy xong, lúc này context sẽ chứa các Bean có đánh
+      // dấu @Component.
+
+      // Lấy Bean ra bằng cách
+      Outfit outfit = context.getBean(Outfit.class);
+
+      // In ra để xem thử nó là gì
+      System.out.println("Instance: " + outfit);
+      // xài hàm wear()
+      outfit.wear();
+   }
+}
+```
+
+Bạn sẽ thấy `Outfit` lúc này chính là `Bikini`. Class đã được đánh dấu là `@Component`.
+
+**Spring Boot** khi chạy sẽ dò tìm toàn bộ các *Class* cùng cấp hoặc ở trong các *package* thấp hơn so với class `BlogApplication` mà bạn cung cấp cho Spring (Chúng ta có thể cấu hình việc tìm kiếm này, sẽ đề cập sau). 
+Trong quá trình dò tìm này, khi gặp một *class* được đánh dấu `@Component` thì nó sẽ tạo ra một *instance* và đưa vào `ApplicationContext` để quản lý.
+
+2. @Autowired
+
+Bây giờ mình tạo ra một Class `Girl` và có một thuộc tính là `Outfit`.
+
+Mình cũng đánh dấu `Girl` là một `@Component`. Tức **Spring Boot** cần tạo ra một *instance* của `Girl` để quản lý.
+
+```java
+@Component
+public class Girl {
+
+   @Autowired
+   Outfit outfit;
+
+   public Girl(Outfit outfit) {
+      this.outfit = outfit;
+   }
+   
+   // GET 
+   // SET
+}
+```
+
+Tôi đánh dấu thuộc tính `Outfit` của `Girl` bởi Annotation `@Autowired`. Điều này nói với **Spring Boot** hãy tự *inject (tiêm)* một instance của `Outfit` vào thuộc tính này khi khởi tạo `Girl`.
+
+Và chạy chương trình
+
+```java
+@SpringBootApplication
+public class App {
+   public static void main(String[] args) {
+      // ApplicationContext chính là container, chứa toàn bộ các Bean
+      ApplicationContext context = SpringApplication.run(App.class, args);
+
+      // Khi chạy xong, lúc này context sẽ chứa các Bean có đánh
+      // dấu @Component.
+
+      // Lấy Bean ra bằng cách
+      Outfit outfit = context.getBean(Outfit.class);
+
+      // In ra để xem thử nó là gì
+      System.out.println("Output Instance: " + outfit);
+      // xài hàm wear()
+      outfit.wear();
+
+      Girl girl = context.getBean(Girl.class);
+
+      System.out.println("Girl Instance: " + girl);
+
+      System.out.println("Girl Outfit: " + girl.outfit);
+
+      girl.outfit.wear();
+   }
+}
+```
+
+**Spring Boot** đã tự tạo ra một `Girl` và trong quá trình tạo ra đó, nó truyền `Outfit` vào làm thuộc tính.
+
+3. Singleton
+
+Điều đặc biệt là các `Bean` được quản lý bên trong `ApplicationContext` đều là ***singleton***. Bạn chắc đã để ý điều này từ các *Output* ở phía trên.
+
+```
+Instance: com.example.blog.Bikini@54336c81
+
+Girl Outfit: com.example.blog.Bikini@54336c81
+```
+
+`Outfit` ở 2 đối tượng trên là một.
+
+Tất cả những `Bean` được quản lý trong `ApplicationContext` đều chỉ được tạo ra **một lần duy nhất** và khi có `Class` yêu cầu `@Autowired` thì nó sẽ lấy đối tượng có sẵn trong `ApplicationContext` để inject vào.
+
+Trong trường hợp bạn muốn mỗi lần sử dụng là một instance hoàn toàn mới. Thì hãy đánh dấu `@Component` đó bằng `@Scope("prototype")`
+
+```java
+@Component
+@Scope("prototype")
+public class Bikini implements Outfit {
+   @Override
+   public void wear() {
+      System.out.println("Mặc bikini");
+   }
+}
+```
