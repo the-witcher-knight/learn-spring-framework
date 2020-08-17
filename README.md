@@ -46,7 +46,19 @@ table of contents
 
    3.2. [Cách cài đặt](#spring_install)
 
-   3.2. [@Component và @Autowired](#springboot_1)
+   3.3. [@Component và @Autowired](#springboot_1)
+
+      3.3.1. [@Component](#spring_component)
+      
+      3.3.2. [@Autowired](#spring_autowired)
+
+   3.4. [Spring Bean Life Cycle, @PostConstruct và @PreDestroy](#springboot_2)
+
+      3.4.1. [@PostConstruct](#spring_postconstruct)
+
+      3.4.2. [@PreDestroy](#spring_predestroy)
+
+      3.4.3. [Bean Life Cycle](#spring_beanlifecycle)
 
 ------------------
 
@@ -1541,7 +1553,7 @@ và đặt tên cho các **dependency** là ***Bean***
 
 `@Component` và `@Autowire` là 2 annotation (chú thích) cơ bản trong Spring boot.
 
-1. @Component là một Annotation đánh dấu trên các `class` để giúp **Spring** biết đó là một `bean`.
+### @Component là một Annotation đánh dấu trên các `class` để giúp **Spring** biết đó là một `bean`. <a name="spring_component"></a>
 
 Ví dụ:
 
@@ -1597,7 +1609,7 @@ Bạn sẽ thấy `Outfit` lúc này chính là `Bikini`. Class đã được đ
 **Spring Boot** khi chạy sẽ dò tìm toàn bộ các *Class* cùng cấp hoặc ở trong các *package* thấp hơn so với class `BlogApplication` mà bạn cung cấp cho Spring (Chúng ta có thể cấu hình việc tìm kiếm này, sẽ đề cập sau). 
 Trong quá trình dò tìm này, khi gặp một *class* được đánh dấu `@Component` thì nó sẽ tạo ra một *instance* và đưa vào `ApplicationContext` để quản lý.
 
-2. @Autowired
+### @Autowired <a name="spring_autowired"></a>
 
 Bây giờ mình tạo ra một Class `Girl` và có một thuộc tính là `Outfit`.
 
@@ -1654,7 +1666,7 @@ public class App {
 
 **Spring Boot** đã tự tạo ra một `Girl` và trong quá trình tạo ra đó, nó truyền `Outfit` vào làm thuộc tính.
 
-3. Singleton
+### Singleton
 
 Điều đặc biệt là các `Bean` được quản lý bên trong `ApplicationContext` đều là ***singleton***. Bạn chắc đã để ý điều này từ các *Output* ở phía trên.
 
@@ -1680,3 +1692,102 @@ public class Bikini implements Outfit {
    }
 }
 ```
+
+## Spring Bean Life Cycle, @PostConstruct và @PreDestroy <a name="springboot_2"></a>
+
+### @PostConstruct <a name="spring_postconstruct"></a>
+
+`@PostConstruct` được đánh dấu trên một method duy nhất bên trong `Bean`. `IoC Container` hoặc `ApplicationContext` sẽ gọi hàm này **sau khi** một `Bean` được tạo ra và quản lý.
+
+```java
+@Component
+public class Girl {
+
+   @PostConstruct
+   public void postConstruct(){
+      System.out.println("\t>> Đối tượng Girl sau khi khởi tạo xong sẽ chạy hàm này");
+   }
+}
+```
+
+### @PreDestroy <a name="spring_predestroy"></a>
+
+`@PreDestroy` được đánh dấu trên một method duy nhất bên trong `Bean`. `IoC Container` hoặc `ApplicationContext` sẽ gọi hàm này **trước khi** một `Bean` bị xóa hoặc không được quản lý nữa.
+
+```java
+@Component
+public class Girl {
+
+   @PreDestroy
+   public void preDestroy(){
+      System.out.println("\t>> Đối tượng Girl trước khi bị destroy thì chạy hàm này");
+   }
+}
+```
+
+### Bean Life Cycle <a name="spring_beanlifecycle"></a>
+
+**Spring Boot** từ thời điểm chạy lần đầu tới khi *shutdown* thì các `Bean` nó quản lý sẽ có một vòng đời được biểu diễn như ảnh dưới đây:
+
+![](./img/spring-bean-life-cycle.jpg)
+
+Cần hiểu như sau:
+
+1. Khi `IoC Container (ApplicationContext)` tìm thấy 1 `Bean` cần quản lý, nó sẽ khởi tạo bằng `constructor`
+
+2. *Inject dependencies* vào `Bean` bằng Setter, và thực hiện các quá trình cài đặt khác vào `Bean` như `setBeanName`, `setBeanClassLoader`, v.v..
+
+3. Gọi hàm `PostConstruct`
+
+4. Tiền xử lý sau khi `PostConstruct` được gọi
+
+5. `Bean` sẵn sàng để hoạt động
+
+6. Nếu `IoC Container` không quản lý `Bean` nữa hoặc bị shutdown nó sẽ gọi hàm `@PreDestroy` trong `Bean`
+
+7. Xóa `Bean`
+
+### Ví dụ
+
+Thêm `@PostConstruct` và `@PreDestroy` vào class `Girl` trong chương trước.
+
+```java
+import org.springframework.stereotype.Component;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+@Component
+public class Girl {
+
+   @PostConstruct
+   public void postConstruct(){
+      System.out.println("\t>> Đối tượng Girl sau khi khởi tạo xong sẽ chạy hàm này");
+   }
+
+   @PreDestroy
+   public void preDestroy(){
+      System.out.println("\t>> Đối tượng Girl trước khi bị destroy thì chạy hàm này");
+   }
+}
+```
+
+và kết quả 
+
+```
+> Trước khi IoC Container được khởi tạo
+> Trước khi IoC Container được khởi tạo
+	>> Đối tượng Girl sau khi khởi tạo xong sẽ chạy hàm này
+> Sau khi IoC Container được khởi tạo
+> Trước khi IoC Container destroy Girl
+	>> Đối tượng Girl trước khi bị destroy thì chạy hàm này
+> Sau khi IoC Container destroy Girl
+```
+
+Bạn sẽ thấy dòng *"Trước khi IoC Container được khởi tạo"* được chạy 2 lần.
+
+> Điều này xảy ra bởi vì hàm `App.main(args)` được chạy 2 lần!
+
+Lần đầu là do chúng ta chạy.
+
+Lần thứ hai là do **Spring Boot** chạy sau khi nó được gọi `SpringApplication.run(App.class, args)`. Đây là lúc mà **IoC Container** (`ApplicationContext`) được tạo ra và đi tìm `Bean`.
+
