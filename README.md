@@ -35,6 +35,8 @@ Spring boot
 
 6. [Component scan](#springboot_componentscan)
 
+7. [Spring Boot @Configuration và @Bean](#springboot_conf_bean)
+
 
 ------------------
 
@@ -689,4 +691,211 @@ Bean: OtherGirl.java
 @ComponentScan({"com.example.blog","com.example.blog.other"})
 // hoặc
 @SpringBootApplication(scanBasePackages = {"com.example.blog", "com.example.blog.other"})
+```
+
+## Spring Boot @Configuration và @Bean <a name="springboot_conf_bean"></a>
+
+`@Configuration` là một Annotation đánh dấu trên một `Class` cho phép **Spring Boot** biết được *đây là nơi định nghĩa ra các `Bean`*.
+
+`@Bean` là một Annotation được đánh dấu trên các method cho phép **Spring Boot** biết được *đây là `Bean`* và sẽ *thực hiện đưa `Bean` này vào `Context`*.
+
+`@Bean` sẽ nằm trong các class có đánh dấu `@Configuration`.
+
+### Ví dụ
+
+viết 1 class `SimpleBean`
+
+```java
+public class SimpleBean {
+   private String username;
+
+   public SimpleBean(String username) {
+      setUsername(username);
+   }
+
+   @Override
+   public String toString() {
+      return "This is a simple bean, name: " + username;
+   }
+
+   public String getUsername() {
+      return username;
+   }
+
+   public void setUsername(String username) {
+      this.username = username;
+   }
+}
+```
+
+class `AppConfig`
+
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppConfig {
+
+   @Bean
+   SimpleBean simpleBeanConfigure(){
+      // Khởi tạo một instance của SimpleBean và trả ra ngoài
+      return new SimpleBean("loda");
+   }
+}
+```
+
+và xử lý trong `BlogAppication`
+
+```java
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+
+@SpringBootApplication
+public class BlogApplication {
+   public static void main(String[] args) {
+
+      ApplicationContext context = SpringApplication.run(BlogApplication.class, args);
+      // Lấy ra bean SimpleBean trong Context
+      SimpleBean simpleBean = context.getBean(SimpleBean.class);
+      // In ra màn hình
+      System.out.println("Simple Bean Example: " + simpleBean.toString());
+   }
+}
+```
+
+`SimpleBean` là một object được quản lý trong `Context` của **Spring Boot**, mặc dù trong bài này, chúng ta không hề sử dụng tới các khái niệm `@Component`.
+
+Đằng sau chương trình, **Spring Boot** lần đầu khởi chạy, ngoài việc đi tìm các `@Component` thì nó còn làm một nhiệm vụ nữa là tìm các class `@Configuration`.
+
+1. Đi tìm class có đánh dấu `@Configuration`
+2. Tạo ra đối tượng từ class có đánh dấu `@Configuration`
+3. Tìm các method có đánh dấu `@Bean` trong đối tượng vừa tạo
+4. Thực hiện gọi các method có đánh dấu `@Bean` để lấy ra các `Bean` và đưa vào `Context`.
+
+Ngoài ra, về bản chất, `@Configuration` cũng là `@Component`. Nó chỉ khác ở ý nghĩa sử dụng. (Giống với việc class được đánh dấu `@Service` chỉ nên phục vụ logic vậy).
+
+> nếu một `Bean` có quá nhiều logic để khởi tạo và cấu hình, thì chúng ta sẽ sử dụng `@Configuration` và `@Bean` để tự tay tạo ra Bean. 
+
+### Ví dụ cấu hình kết nối database sử dụng `@Configuration` và `@Bean`
+
+Đầu tiên, ta tạo 1 abstract class là `DatabaseConnector` để có thể phục vụ cho nhiều ngữ cảnh
+
+```java
+public abstract class DatabaseConnector {
+   private String url;
+
+   public abstract void connect();
+
+   public String getUrl() {
+      return url;
+   }
+
+   public void setUrl(String url) {
+      this.url = url;
+   }
+}
+```
+
+Kế thừa class này có 2 class: MySqlConnector, MongoDBConnector.
+
+```java
+public class MySqlConnector extends DatabaseConnector{
+    @Override
+    public void connect(){
+        System.out.println("Đã kết nối tới Mysql: " + getUrl());
+    }
+}
+```
+
+và
+
+```java
+public class MongoDB extends DatabaseConnector{
+    @Override
+    public void connect(){
+        System.out.println("Đã kết nối tới MongoDB: " + getUrl());
+    }
+}
+```
+
+Sao đó, ta tạo `Bean` trong `AppConf`
+
+```java
+@Configuration
+public class AppConf {
+    @Bean("mysqlConnector")
+    DatabaseConnector mysqlConfigure(){
+        DatabaseConnector mysqlConnector = new MySqlConnector();
+        mysqlConnector.setUrl("jdbc:mysql://host1:33060/blog");
+        return mysqlConnector;
+    }
+
+    @Bean("mongodbConnector")
+    DatabaseConnector mongodbConfigure(){
+        DatabaseConnector mongodbConnector = new MongoDB();
+        mongodbConnector.setUrl("mongodb://mongodb0.example.com:27017/blog");
+        return mongodbConnector;
+    }
+}
+```
+
+Và chạy thử,
+
+```java
+@SpringBootApplication
+public class BlogApplication {
+
+	public static void main(String[] args) {
+
+		ApplicationContext context = SpringApplication.run(BlogApplication.class, args);
+
+		DatabaseConnector mysql = context.getBean(MySqlConnector.class);
+		mysql.connect();
+
+		DatabaseConnector mongodb = context.getBean(MongoDB.class);
+		mongodb.connect();
+	}
+}
+```
+
+> Thực tế, việc sử dụng `@Configuration` là hết sức cần thiết, và nó đóng vai trò là **nơi cấu hình** cho toàn bộ ứng dụng. 
+
+Một Ứng dụng sẽ có nhiều class chứa `@Configuration` và mỗi class sẽ đảm nhận cấu hình một bộ phận gì đó trong ứng dụng.
+
+### Ví dụ 1 đoạn code cấu hình **Spring Security**
+
+```java
+@Configuration
+@EnableWebSecurity
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests()
+                .antMatchers("/", "/home").permitAll()
+                .anyRequest().authenticated()
+                .and()
+            .formLogin()
+                .loginPage("/login")
+                .permitAll()
+                .and()
+            .logout()
+                .permitAll();
+    }
+
+    @Bean
+    @Override
+    public UserDetailsService userDetailsService() {
+        UserDetails user =
+             User.withDefaultPasswordEncoder()
+                .username("user")
+                .password("password")
+                .roles("USER")
+                .build();
+
+        return new InMemoryUserDetailsManager(user);
+    }
+}
 ```
