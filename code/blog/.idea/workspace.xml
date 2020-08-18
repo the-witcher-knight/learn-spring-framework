@@ -24,8 +24,17 @@
   <component name="ChangeListManager">
     <list default="true" id="f7a5dc6d-945e-4b36-b7f5-c3b1a7b4d8d4" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/../../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/blog/BlogApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/blog/BlogApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/blog/Girl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/blog/Girl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/blog/GirlRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/blog/GirlRepositoryImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/blog/GirlService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/blog/BlogApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/blog/BlogApplication.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/blog/Girl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/blog/Girl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/blog/GirlRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/blog/GirlRepositoryImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/blog/GirlService.class" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,26 +123,26 @@
       <screen x="0" y="0" width="1280" height="984" />
     </state>
     <state x="445" y="198" key="#com.intellij.ide.util.MemberChooser/0.0.1280.984@0.0.1280.984" timestamp="1597594367767" />
-    <state x="370" y="239" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1597672659083">
+    <state x="370" y="239" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1597741686606">
       <screen x="0" y="0" width="1280" height="984" />
     </state>
-    <state x="370" y="239" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1280.984@0.0.1280.984" timestamp="1597672659083" />
-    <state width="1237" height="263" key="GridCell.Tab.0.bottom" timestamp="1597673842867">
+    <state x="370" y="239" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1280.984@0.0.1280.984" timestamp="1597741686606" />
+    <state width="1237" height="422" key="GridCell.Tab.0.bottom" timestamp="1597741911152">
       <screen x="0" y="0" width="1280" height="984" />
     </state>
-    <state width="1237" height="263" key="GridCell.Tab.0.bottom/0.0.1280.984@0.0.1280.984" timestamp="1597673842867" />
-    <state width="1237" height="263" key="GridCell.Tab.0.center" timestamp="1597673842867">
+    <state width="1237" height="422" key="GridCell.Tab.0.bottom/0.0.1280.984@0.0.1280.984" timestamp="1597741911152" />
+    <state width="1237" height="422" key="GridCell.Tab.0.center" timestamp="1597741911152">
       <screen x="0" y="0" width="1280" height="984" />
     </state>
-    <state width="1237" height="263" key="GridCell.Tab.0.center/0.0.1280.984@0.0.1280.984" timestamp="1597673842867" />
-    <state width="1237" height="263" key="GridCell.Tab.0.left" timestamp="1597673842866">
+    <state width="1237" height="422" key="GridCell.Tab.0.center/0.0.1280.984@0.0.1280.984" timestamp="1597741911152" />
+    <state width="1237" height="422" key="GridCell.Tab.0.left" timestamp="1597741911152">
       <screen x="0" y="0" width="1280" height="984" />
     </state>
-    <state width="1237" height="263" key="GridCell.Tab.0.left/0.0.1280.984@0.0.1280.984" timestamp="1597673842866" />
-    <state width="1237" height="263" key="GridCell.Tab.0.right" timestamp="1597673842867">
+    <state width="1237" height="422" key="GridCell.Tab.0.left/0.0.1280.984@0.0.1280.984" timestamp="1597741911152" />
+    <state width="1237" height="422" key="GridCell.Tab.0.right" timestamp="1597741911152">
       <screen x="0" y="0" width="1280" height="984" />
     </state>
-    <state width="1237" height="263" key="GridCell.Tab.0.right/0.0.1280.984@0.0.1280.984" timestamp="1597673842867" />
+    <state width="1237" height="422" key="GridCell.Tab.0.right/0.0.1280.984@0.0.1280.984" timestamp="1597741911152" />
     <state x="170" y="147" key="Maven.ArtifactSearchDialog" timestamp="1597673576113">
       <screen x="0" y="0" width="1280" height="984" />
     </state>

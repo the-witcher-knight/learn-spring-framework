@@ -13,7 +13,7 @@ Spring boot
 
 2. [Cách cài đặt](#spring_install)
 
-3. [@Component và @Autowired](#springboot_1)
+3. [Spring boot @Component và @Autowired](#springboot_1)
 
    3.1. [@Component](#spring_component)
    
@@ -32,6 +32,9 @@ Spring boot
    5.1. [Kiến trúc trong spring boot](#springboot_architecture)
 
    5.2. [@Controller vs @Service vs @Repository](#springboot_csr)
+
+6. [Component scan](#springboot_componentscan)
+
 
 ------------------
 
@@ -607,3 +610,83 @@ Tuy nhiên từ góc độ thiết kế thì chúng ta cần *phân rõ* 3 Annot
 - `@Service` gắn cho các Bean đảm nhiệm *xử lý logic*
 - `@Repository` gắn cho các Bean đảm nhiệm *giao tiếp với DB*
 - `@Component` gắn cho các Bean khác.
+
+## Component Scan <a name="springboot_componentscan></a>
+
+Là cách **Spring Boot** tìm kiếm `Bean` trong project.
+
+**Spring Boot** khi chạy sẽ dò tìm toàn bộ các `Class` cùng cấp hoặc ở trong các `package` thấp hơn và tạo ra `Bean` từ các `Class` tìm thấy.
+
+Có 2 cách để tùy chỉnh cấu hình **Spring Boot** chỉ tìm kiếm các `Bean` trong một package nhất định:
+
+1. `@ComponentScan`.
+
+2. Sử dụng `scanBasePackages` tromg `@SpringBootApplication`.
+
+### Sử dụng `@ComponentScan`
+
+```java
+@ComponentScan("com.example.blog.other")
+@SpringBootApplication
+public class App {
+   public static void main(String[] args) {
+      ApplicationContext context = SpringApplication.run(App.class, args);
+      try {
+         Girl girl = context.getBean(Girl.class);
+         System.out.println("Bean: " + girl.toString());
+      } catch (Exception e) {
+         System.out.println("Bean Girl không tồn tại");
+      }
+
+      try {
+         OtherGirl otherGirl = context.getBean(OtherGirl.class);
+         if (otherGirl != null) {
+               System.out.println("Bean: " + otherGirl.toString());
+         }
+      } catch (Exception e) {
+         System.out.println("Bean Girl không tồn tại");
+      }
+   }
+}
+```
+
+### Sử dụng `scanBasePackages`
+
+```java
+@SpringBootApplication(scanBasePackages = "com.example.blog.other")
+public class App {
+   public static void main(String[] args) {
+      ApplicationContext context = SpringApplication.run(App.class, args);
+      try {
+         Girl girl = context.getBean(Girl.class);
+         System.out.println("Bean: " + girl.toString());
+      } catch (Exception e) {
+         System.out.println("Bean Girl không tồn tại");
+      }
+
+      try {
+         OtherGirl otherGirl = context.getBean(OtherGirl.class);
+         if (otherGirl != null) {
+               System.out.println("Bean: " + otherGirl.toString());
+         }
+      } catch (Exception e) {
+         System.out.println("Bean Girl không tồn tại");
+      }
+   }
+}
+```
+
+Theo như 2 ví dụ này, ta chỉ tìm các `Bean` trong `com.example.blog.other` nên kết quả sẽ như thế này:
+
+```
+Bean Girl không tồn tại
+Bean: OtherGirl.java
+```
+
+> Có thể cấu hình để tìm `Bean` ở nhiều package khác nhau 
+
+```java
+@ComponentScan({"com.example.blog","com.example.blog.other"})
+// hoặc
+@SpringBootApplication(scanBasePackages = {"com.example.blog", "com.example.blog.other"})
+```
