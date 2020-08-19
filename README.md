@@ -15,9 +15,11 @@ Spring boot
 
 3. [Spring boot @Component và @Autowired](#springboot_1)
 
-   3.1. [@Component](#spring_component)
+   3.1. [Annotation @Component](#spring_component)
    
-   3.3.2. [@Autowired](#spring_autowired)
+   3.3.2. [Annotation @Autowired](#spring_autowired)
+
+   3.3.3. [Annotation @Primary](#spring_primary)
 
 4. [Spring Bean Life Cycle, @PostConstruct và @PreDestroy](#springboot_2)
 
@@ -36,6 +38,8 @@ Spring boot
 6. [Component scan](#springboot_componentscan)
 
 7. [Spring Boot @Configuration và @Bean](#springboot_conf_bean)
+
+8. [Spring Boot Application Config và annotation @Value](#springboot_8)
 
 
 ------------------
@@ -232,15 +236,15 @@ và đặt tên cho các **dependency** là ***Bean***
 
 Ví dụ:
 
-Ta có một interface `outfit`
+Ta có một interface `Keycap`
 
 ```java
-public interface Outfit {
-   public void wear();
+public interface Keycap {
+    public void insert();
 }
 ```
 
-implement nó là Class `Bikini`
+implement nó là Class `Cherry`
 
 ```java
 /*
@@ -249,11 +253,12 @@ implement nó là Class `Bikini`
  Và sẽ được Spring Boot quản lý
 */
 @Component
-public class Bikini implements Outfit {
-   @Override
-   public void wear() {
-      System.out.println("Mặc bikini");
-   }
+public class Cherry implements Keycap {
+
+    @Override
+    public void insert() {
+        System.out.println("Gắn key cap cherry profile vào keyboard");
+    }
 }
 ```
 
@@ -269,44 +274,40 @@ public class App {
       // dấu @Component.
 
       // Lấy Bean ra bằng cách
-      Outfit outfit = context.getBean(Outfit.class);
+     	Keycap minila = context.getBean(Cherry.class);
 
       // In ra để xem thử nó là gì
-      System.out.println("Instance: " + outfit);
+      System.out.println("Instance: " + minila);
       // xài hàm wear()
-      outfit.wear();
+      minila.insert();
    }
 }
 ```
 
-Bạn sẽ thấy `Outfit` lúc này chính là `Bikini`. Class đã được đánh dấu là `@Component`.
+Bạn sẽ thấy `Keycap` lúc này chính là `Cherry`. Class đã được đánh dấu là `@Component`.
 
 **Spring Boot** khi chạy sẽ dò tìm toàn bộ các *Class* cùng cấp hoặc ở trong các *package* thấp hơn so với class `BlogApplication` mà bạn cung cấp cho Spring (Chúng ta có thể cấu hình việc tìm kiếm này, sẽ đề cập sau). 
 Trong quá trình dò tìm này, khi gặp một *class* được đánh dấu `@Component` thì nó sẽ tạo ra một *instance* và đưa vào `ApplicationContext` để quản lý.
 
 ### @Autowired <a name="spring_autowired"></a>
 
-Bây giờ mình tạo ra một Class `Girl` và có một thuộc tính là `Outfit`.
+Bây giờ mình tạo ra một Class `MyKeyboard` và có một thuộc tính là `Keycap`.
 
-Mình cũng đánh dấu `Girl` là một `@Component`. Tức **Spring Boot** cần tạo ra một *instance* của `Girl` để quản lý.
+Mình cũng đánh dấu `MyKeyboard` là một `@Component`. Tức **Spring Boot** cần tạo ra một *instance* của `MyKeyboard` để quản lý.
 
 ```java
 @Component
-public class Girl {
+public class MyKeyboard {
+    @Autowired
+    Keycap keycap;
 
-   @Autowired
-   Outfit outfit;
-
-   public Girl(Outfit outfit) {
-      this.outfit = outfit;
-   }
-   
-   // GET 
-   // SET
+    public MyKeyboard(Keycap keycap) {
+        this.keycap = keycap;
+    }
 }
 ```
 
-Tôi đánh dấu thuộc tính `Outfit` của `Girl` bởi Annotation `@Autowired`. Điều này nói với **Spring Boot** hãy tự *inject (tiêm)* một instance của `Outfit` vào thuộc tính này khi khởi tạo `Girl`.
+Tôi đánh dấu thuộc tính `Keycap` của `MyKeyboard` bởi Annotation `@Autowired`. Điều này nói với **Spring Boot** hãy tự *inject (tiêm)* một instance của `Keycap` vào thuộc tính này khi khởi tạo `MyKeyboard`.
 
 Và chạy chương trình
 
@@ -321,37 +322,31 @@ public class App {
       // dấu @Component.
 
       // Lấy Bean ra bằng cách
-      Outfit outfit = context.getBean(Outfit.class);
+      Keycap cherry = context.getBean(Cherry.class)
 
       // In ra để xem thử nó là gì
-      System.out.println("Output Instance: " + outfit);
+      System.out.println("Output Instance: " + cherry);
       // xài hàm wear()
-      outfit.wear();
+      cherry.insert();
 
-      Girl girl = context.getBean(Girl.class);
+      MyKeyboard gk61 = context.getBean(MyKeyboard.class);
 
-      System.out.println("Girl Instance: " + girl);
+      System.out.println("Keyboard Instance: " + gk61);
 
-      System.out.println("Girl Outfit: " + girl.outfit);
+      System.out.println("Keyboard Keycap: " + gk61.keycap);
 
-      girl.outfit.wear();
+      gk61.keycap.insert();
    }
 }
 ```
 
-**Spring Boot** đã tự tạo ra một `Girl` và trong quá trình tạo ra đó, nó truyền `Outfit` vào làm thuộc tính.
+**Spring Boot** đã tự tạo ra một `MyKeyboard` và trong quá trình tạo ra đó, nó truyền `Keycap` vào làm thuộc tính.
 
 ### Singleton
 
 Điều đặc biệt là các `Bean` được quản lý bên trong `ApplicationContext` đều là ***singleton***. Bạn chắc đã để ý điều này từ các *Output* ở phía trên.
 
-```
-Instance: com.example.blog.Bikini@54336c81
-
-Girl Outfit: com.example.blog.Bikini@54336c81
-```
-
-`Outfit` ở 2 đối tượng trên là một.
+`Keycap` ở 2 đối tượng trên là một.
 
 Tất cả những `Bean` được quản lý trong `ApplicationContext` đều chỉ được tạo ra **một lần duy nhất** và khi có `Class` yêu cầu `@Autowired` thì nó sẽ lấy đối tượng có sẵn trong `ApplicationContext` để inject vào.
 
@@ -360,13 +355,23 @@ Trong trường hợp bạn muốn mỗi lần sử dụng là một instance ho
 ```java
 @Component
 @Scope("prototype")
-public class Bikini implements Outfit {
+public class Cherry implements Keycap {
    @Override
    public void wear() {
-      System.out.println("Mặc bikini");
+      System.out.println("Gắn key cap cherry profile vào keyboard");
    }
 }
 ```
+
+### Annotation Primary <a name="spring_primary"></a>
+
+Trong ví dụ trên nếu ta có thêm nhiều class tương tự class `Cherry` (implement `Keycap`) thì chương trình sẽ báo lỗi 
+
+```
+Parameter 0 of constructor in com.example.demo.MyKeyboard required a single bean
+```
+
+Để fix chúng ta cần đặt một trong những class implement `Keycap` là `@Primary`.
 
 ## Spring Bean Life Cycle, @PostConstruct và @PreDestroy <a name="springboot_2"></a>
 
@@ -802,10 +807,10 @@ Kế thừa class này có 2 class: MySqlConnector, MongoDBConnector.
 
 ```java
 public class MySqlConnector extends DatabaseConnector{
-    @Override
-    public void connect(){
-        System.out.println("Đã kết nối tới Mysql: " + getUrl());
-    }
+   @Override
+   public void connect(){
+      System.out.println("Đã kết nối tới Mysql: " + getUrl());
+   }
 }
 ```
 
@@ -899,3 +904,49 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 }
 ```
+
+## Spring Boot Application Config và annotation @Value <a name="springboot_8"></a>
+
+Trong thực tế không phải lúc nào chúng ta cũng nên để mọi thứ trong code của mình. Có những thông số tốt hơn hết nên được truyền từ bên ngoài vào ứng dụng, để giúp ứng dụng của bạn dễ dàng thay đổi giữa các môi trường khác nhau.
+
+Để phục vụ điều này, chúng ta sẽ tìm hiểu về khái niệm config ứng dụng **Spring Boot** với `application.properties`
+
+### application.properties
+
+Trong Spring Boot, các thông tin cấu hình mặc định được lấy từ file resources/applications.properties.
+
+Ví dụ, bạn muốn Spring Boot chạy trên port 8081 thay vì 8080:
+
+```
+server.port = 8081
+```
+
+Hoặc bạn muốn log của chương trình chi tiết hơn. Hãy chuyển nó sang Debug bằng cách config như sau:
+
+```
+logging.level.root=DEBUG
+```
+
+Đây là cách chúng ta có thể can thiệp vào các cấu hình của ứng dụng từ bên ngoài. Cho phép thay đổi linh hoạt tùy môi trường.
+
+### Annotation @Value
+
+Trong trường hợp, bạn muốn tự config những giá trị của riêng mình, thì Spring Boot hỗ trợ bạn với annotation `@Value`
+
+Ví dụ, tôi muốn cấu hình cho thông tin database của tôi từ bên ngoài ứng dụng
+
+```
+loda.mysql.url=jdbc:mysql://host1:33060/loda
+```
+
+> `@Value` được sử dụng trên thuộc tính của class, Có nhiệm vụ lấy thông tin từ file properties và gán vào biến.
+
+```java
+public class AppConfig {
+    // Lấy giá trị config từ file application.properties
+    @Value("${loda.mysql.url}")
+    String mysqlUrl;
+}
+```
+
+Thông tin truyền vào annottaion `@Value` chính là tên của cấu hình đặt trong dấu `${name}`
