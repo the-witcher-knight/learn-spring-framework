@@ -41,6 +41,8 @@ Spring boot
 
 8. [Spring Boot Application Config và annotation @Value](#springboot_8)
 
+9. [Spring Boot @Controller, và ví dụ tạo trang web Hello World](#springboot_9)
+
 
 ------------------
 
@@ -385,7 +387,7 @@ public class Girl {
 
    @PostConstruct
    public void postConstruct(){
-      System.out.println("\t>> Đối tượng Girl sau khi khởi tạo xong sẽ chạy hàm này");
+      System.out.println("\t>> Đối tượng MyKeyboard sau khi khởi tạo xong sẽ chạy hàm này");
    }
 }
 ```
@@ -400,7 +402,7 @@ public class Girl {
 
    @PreDestroy
    public void preDestroy(){
-      System.out.println("\t>> Đối tượng Girl trước khi bị destroy thì chạy hàm này");
+      System.out.println("\t>> Đối tượng MyKeyboard trước khi bị destroy thì chạy hàm này");
    }
 }
 ```
@@ -437,16 +439,16 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 @Component
-public class Girl {
+public class MyKeyboard {
 
    @PostConstruct
    public void postConstruct(){
-      System.out.println("\t>> Đối tượng Girl sau khi khởi tạo xong sẽ chạy hàm này");
+      System.out.println("\t>> Đối tượng MyKeyboard sau khi khởi tạo xong sẽ chạy hàm này");
    }
 
    @PreDestroy
    public void preDestroy(){
-      System.out.println("\t>> Đối tượng Girl trước khi bị destroy thì chạy hàm này");
+      System.out.println("\t>> Đối tượng MyKeyboard trước khi bị destroy thì chạy hàm này");
    }
 }
 ```
@@ -456,11 +458,11 @@ và kết quả
 ```
 > Trước khi IoC Container được khởi tạo
 > Trước khi IoC Container được khởi tạo
-	>> Đối tượng Girl sau khi khởi tạo xong sẽ chạy hàm này
+	>> Đối tượng MyKeyboard sau khi khởi tạo xong sẽ chạy hàm này
 > Sau khi IoC Container được khởi tạo
-> Trước khi IoC Container destroy Girl
-	>> Đối tượng Girl trước khi bị destroy thì chạy hàm này
-> Sau khi IoC Container destroy Girl
+> Trước khi IoC Container destroy MyKeyboard
+	>> Đối tượng MyKeyboard trước khi bị destroy thì chạy hàm này
+> Sau khi IoC Container destroy MyKeyboard
 ```
 
 Bạn sẽ thấy dòng *"Trước khi IoC Container được khởi tạo"* được chạy 2 lần.
@@ -499,7 +501,7 @@ Kiến trúc Controller-Service - Repository chia project thành 3 lớp:
 
 ### Ví dụ
 
-Đầu tiên ta làm 1 class `Girl`
+Đầu tiên ta tạo 1 class `Girl` làm `model`
 
 ```java
 public class Girl {
@@ -950,3 +952,138 @@ public class AppConfig {
 ```
 
 Thông tin truyền vào annottaion `@Value` chính là tên của cấu hình đặt trong dấu `${name}`
+
+## Spring Boot Controller và ví dụ Hello World <a name="springboot_9></a>
+
+### Controller 
+
+Để xây dựng một trang web với `Spring Boot` cần tuân thủ quy trình sau:
+
+![](./img/quy-trinh.png)
+
+`@Controller` là nơi tiếp nhận các thông tin request từ phía người dùng. Nó có nhiệm vụ đón nhận các yêu cầu và chuyển các yêu cầu này xuống cho tầng `@Service` xử lý logic.
+
+### Ví dụ tạo trang web Hello World
+
+> Ví dụ nảy có sử dụng Thymeleaf: Đây là một Template Engine hỗ trợ chúng ta tạo ra các file html để trả về thông tin cho người dùng.
+
+Mặc định trong **Spring Boot** các file html sẽ được lưu trữ trong thư mục `resources/templates`
+
+Đầu tiên, ta tạo một `@Controller`
+
+```java
+@Controller
+public class WebController {
+    // Đón nhận request GET
+    @GetMapping("/") // Nếu người dùng request tới địa chỉ "/"
+    public String index() {
+        return "index"; // Trả về file index.html
+    }
+}
+```
+
+và một file html đơn giản 
+
+```html
+<h1>Hello, World</h1>
+```
+
+> Đừng quên thêm thymeleaf vào file `build.gradle`
+
+Bản thân `@Controller` cũng là một Component nên nó sẽ được **Spring Boot** quản lý. 
+
+**Spring Boot** sẽ lắng nghe các request từ phía người dùng và tùy theo `path` là gì, nó sẽ mapping tới vị trí hàm xử lý tương ứng trong `@Controller`.
+
+Như ví dụ trên, tôi sử dụng `GET` vào địa chỉ `localhost:8080/` ( đường dẫn là /). **Spring Boot** sẽ gọi tới hàm có gắn `@GetMapping("/")` và yêu cầu hàm này xử lý `request` này.
+
+### Ví dụ mở rộng
+
+Ví dụ nhập tên vào và xuất ra Hello, tên.
+
+Đầu tiên, tạo các file html làm giao diện cho web
+
+*index.html*
+
+```HTML
+<head>
+    <title>Hello World</title>
+</head>
+<body>
+
+<h1>Demo website Spring Boot</h1>
+
+<a href="/about">About</a>
+
+<form method="get" action="/hello">
+    <input type="input" name="name">
+    <button type="submit">Submit</button>
+</form>
+</body>
+```
+
+*about.html*
+
+```HTML
+<head>
+    <meta charset="UTF-8">
+    <title>About</title>
+</head>
+<body>
+    <h1>Tôi là tôi</h1>
+</body>
+```
+
+*hello.html*
+
+```html
+<head>
+    <title>Hello World</title>
+</head>
+<body>
+    <h1 th:text="'Hello, ' + ${name}"></h1>
+    <a href="/">Trang chủ</a>
+</body>
+```
+
+Sau đó, mapping các `path` với các hàm xử lý trong `WebController`
+
+```java
+@Controller
+public class WebController {
+
+    @GetMapping("/")
+    public String index(){
+        return "index";
+    }
+
+    @GetMapping("/about")
+    public String about(){
+        return "about";
+    }
+
+    @GetMapping("/hello")
+    // Model là một object của Spring Boot, được gắn vào trong mọi request.
+    public String hello(@RequestParam(name = "name", required = false, defaultValue = "World") String name, Model model){
+        // Gắn vào model giá trị name nhận được
+        model.addAttribute("name", name);
+        return "hello";
+        // trả về file hello.html cùng với thông tin trong object Model
+    }
+}
+```
+
+Khi nhập tên vào form và bấm submit thì đường dẫn sẽ thành: http://localhost:8080/hello?name=vae
+
+Ta sẽ nhận được giá trị của `name` và gán nó vào `Model`.
+
+![](./img/example-hello-world.png)
+
+`Model` ở đây là một object được **Spring Boot** đính kèm trong mỗi response.
+
+`Model` chứa các thông tin mà bạn muốn trả về và **Template Engine** sẽ trích xuất thông tin này ra thành html và đưa cho người dùng.
+
+Trong file `hello.html` tôi lấy giá trị của `name` trong `Model` ra bằng cách sử dụng cú pháp của `Thymeleaf`
+
+```java
+<h1 th:text="'Hello, ' + ${name}"></h1>
+```
