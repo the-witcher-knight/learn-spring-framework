@@ -4,6 +4,8 @@
 
 [Java OOP](./DOC/java-oop.md)
 
+[Code Java nhanh sử dụng Lombok](./DOC/Lombok.md)
+
 ------------------
 table of contents
 
@@ -42,6 +44,9 @@ Spring boot
 8. [Spring Boot Application Config và annotation @Value](#springboot_8)
 
 9. [Spring Boot @Controller, và ví dụ tạo trang web Hello World](#springboot_9)
+
+10. [Giải thích cách Thymeleaf vận hành + Expression + Demo Full](#springboot_10)
+
 
 
 ------------------
@@ -953,7 +958,7 @@ public class AppConfig {
 
 Thông tin truyền vào annottaion `@Value` chính là tên của cấu hình đặt trong dấu `${name}`
 
-## Spring Boot Controller và ví dụ Hello World <a name="springboot_9></a>
+## Spring Boot Controller và ví dụ Hello World <a name="springboot_9"></a>
 
 ### Controller 
 
@@ -1087,3 +1092,224 @@ Trong file `hello.html` tôi lấy giá trị của `name` trong `Model` ra bằ
 ```java
 <h1 th:text="'Hello, ' + ${name}"></h1>
 ```
+
+## Giải thích cách Thymeleaf vận hành + Expression + Demo Full <a name="springboot_10></a>
+
+### Giới thiệu cơ bản về Thymeleaf 
+
+**Thymeleaf** là một `Java Template Engine`. Có nhiệm vụ *xử lý và generate* ra các file HTML, XML, v.v..
+
+Các file HMTL do **Thymeleaf** tạo ra là nhờ kết hợp dữ liệu và template + quy tắc để sinh ra một file HTML chứa đầy đủ thông tin.
+
+Việc của bạn là cung cấp dữ liệu và quy định template như nào, còn việc dùng các thông tin đó để render ra HTML sẽ do **Thymeleaf** giải quyết.
+
+### Cú pháp của Thymeleaf 
+
+Cú pháp của **Thymeleaf** sẽ là một `attributes` (Thuộc tính) của thẻ HTML và bắt đầu bằng chữ `th:`.
+
+Với cách tiếp cận này, bạn sẽ chỉ cần sử dụng các thẻ HTML cơ bản đã biết mà không cần bổ sung thêm syntax hay thẻ mới như JSP truyền thống.
+
+Ví dụ: Để truyền dữ liệu từ biến `name` trong Java vào một thẻ `H1` của HTML.
+
+```html
+<h1 th:text="${name}"></h1>
+```
+
+Chúng ta viết thẻ `H1` như bình thường, nhưng không chứa bất cứ text nào trong thẻ. Mà sử dụng cú pháp `th:text="${name}"` để **Thymeleaf** lấy thông tin từ biến `name` và đưa vào thẻ `H1`.
+
+Kết quả khi render ra:
+Giả sử String name = "Vae"
+
+```html
+<h1>vae</h1>
+```
+
+thuộc tính `th:text` biến mất và giá trị biến `name` được đưa vào trong thẻ `H1`.
+
+Đó là cách **Thymeleaf** hoạt động.
+
+### Model & View trong Spring Boot
+
+`Model` là đối tượng lưu giữ thông tin và được sử dụng bởi `Template Engine` để generate ra webpage. Có thể hiểu nó là `context` của **Thymeleaf**.
+
+`Model` lưu giữ thông tin dưới dạng key-value
+
+Trong template **thymeleaf**, để lấy các thông tin trong `Model`. bạn sẽ sử dụng `Thymeleaf Standard Expression`.
+
+- `${...}`: giá trị của 1 biến (variable expression)
+- `*{...}`: giá trị của 1 biến được chỉ định (variable expression on selection)
+- `#{...}`: lấy message (message expression)
+- `@{...}`: Lấy đường dẫn URL dựa theo context của server (URL expression)
+
+#### Ví dụ minh họa cho từng expression
+
+1. ${...} - variable expression
+
+Đưa vào model một giá trị
+
+```java
+model.addAttribute("today", "Monday");
+```
+
+Để lấy giá trị của biến today, ta sử dụng `${...}`
+
+```html
+<p>Today: <span th:text="${today}"></span><p>
+```
+Đoạn expression trên tương ứng với:
+
+```java
+ctx.getVariable("today");
+```
+
+2. *{...} - variable expression on selections
+
+Dấu `*` còn được gọi là asterisk syntax. Chức năng của nó giống với variable expression.
+
+Điểm khác biệt là nó sẽ lấy giá trị của 1 biến được cho trước bởi `th:object`.
+
+```html
+<div th:object="${session.user}">
+<!-- th:object tồn tại trong phạm vi của thẻ div này -->
+    <p>Name: <span th:text="*{firstName}"></span></p>
+
+    <p>Age: <span th:text="*{age}"></span></p>
+</div>
+```
+
+Còn variable expression sẽ lấy giá trị trong `Model` hay `Context`
+
+Vậy đoạn code trên tương đương với các sử dụng variable expression
+
+```html
+<div>
+    <p>Name: <span th:text="${session.user.firstName}"></span></p>
+
+    <p>Age: <span th:text="${session.user.age}"></span></p>
+</div>
+```
+
+3. #{...} - message expression
+
+Ví dụ trong file config `.properties` có một messenger chào người dùng.
+
+```
+home.welcome = Hello bà con
+```
+
+thì cách lấy nó ra nhanh nhất là:
+
+```html
+<p th:utext="#{home.welcome}">xin chào các bạn</p>
+```
+
+Đoạn text "xin chào các bạn" sẽ bị thay thế bới thymeleaf khi render `#{home.welcome}`
+
+4. @{...} - URL expression
+
+`@{...}` xử lý và trả ra giá trị URL theo context của máy chủ cho chúng ta.
+
+Nếu bắt dầu bằng dấu / thì nó sẽ là Relative URL và sẽ tương ứng theo context của máy chủ của bạn.
+
+### Demo minh họa
+
+Tạo cấu trúc thư mục
+
+```
+src
+|-  main
+       |- java
+          |- com.example.demo
+             DemoApplication.java
+             Info.java
+             WebController.java
+       |- resources 
+          |- i18n
+             |- messages.properties
+             |- messages_vi.properties
+             |- messages_en.properties
+          |- static
+             |- css
+             |- js
+          |- templates
+          application.properties
+```
+
+
+nội dung file `application.properties` để cấu hình ứng dụng
+
+```
+#Chạy ứng dụng trên port 8085
+server.port=8085
+
+# Bỏ tính năng cache của thymeleaf để lập trình cho nhanh
+spring.thymeleaf.cache=false
+
+# Các message tĩnh sẽ được lưu tại thư mục i18n
+spring.messages.basename=i18n/messages
+
+
+# Bỏ properties này đi khi deploy
+# Nó có tác dụng cố định ngôn ngữ hiện tại chỉ là Tiếng Việt
+spring.mvc.locale-resolver=fixed
+
+# Mặc định ngôn ngữ là tiếng việt
+spring.mvc.locale=vi_VN
+# Đổi thành tiếng anh bằng cách bỏ comment ở dứoi
+# spring.mvc.locale=en_US
+```
+
+Tôi làm 1 câu chào đơn giản cho 2 vùng US và VN
+
+*i18n/messages_vi.properties*
+
+```
+demo.hello = Chào bà con 
+```
+
+*i18n/messages_en.properties*
+
+```
+demo.hello = Hello everybody
+```
+
+Làm web thì không thể thiếu `css` và `javascript`. Các file này sẽ được lưu trử tại thư mục `resources/static`.
+
+File `.html` là dạng template sử dụng để render ra webpage và trả về cho người dùng. Nó sẽ được lưu tại thư mục `resources/templates`
+
+**Thymleaf** sẽ tự biết tìm đường tới những tài nguyên này.
+
+`index.html` sẽ là file mặc định mà **Thymeleaf** tìm đầu tiên và trả về mỗi khi người dùng vào địa chỉ `/` hay `https://localhost:8085/` mà chúng ta không cần `config` gì cả.
+
+Trong `index.html` tôi sẽ:
+
+1. Gọi ra `bootstrap.css` và `bootstrap.js` trong thư mục `resource/static` bằng expression `@{...}`
+
+2. Hiển thị dòng chữ chào `demo.hello` trong thư mục `resource/i18n` bằng expression `#{...}`
+
+Tẹo template `index.html`
+
+```html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Hello World</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+
+    <!-- css -->
+    <link th:href="@{/css/bootstrap.css}" rel="stylesheet">
+
+    <!-- js -->
+    <script th:src="@{/js/bootstrap.js}"></script>
+</head>
+    <body>
+        <h1 th:utext="#{demo.hello}"></h1>
+
+        <a th:href="@{/profile}" class="btn btn-primary">click me</a>
+    </body>
+</html>
+```
+
+
+
