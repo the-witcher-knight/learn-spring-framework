@@ -17,25 +17,7 @@ Cần cài `Lombok` trong project và trong IDE
 
 1. Đưa `Lombok` vào project
 
-*Maven*
-
-```
-<dependency>
-    <groupId>org.projectlombok</groupId>
-    <artifactId>lombok</artifactId>
-    <version>1.18.4</version>
-    <scope>provided</scope>
-</dependency>
-```
-
-*Gradle*
-
-```
-// https://mvnrepository.com/artifact/org.projectlombok/lombok
-providedCompile group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
-```
-
-> click vào link để tải lombok mới nhất 
+> Cách tốt nhất là dùng [spring initilizr](https://start.spring.io/) để add dependency lombok vào 
 
 2. Cài `Lombok plugin` vào IDE
 
@@ -59,3 +41,143 @@ Như vậy là xong
 
 ### Annotation @Data
 
+Để tạo 1 đối tượng `Employee` với những hàm cơ bản thông thường ta phải viết như sau:
+
+```java
+public class Employee {
+    private String name;
+    private int age;
+
+    public Employee(){}
+
+    public void setName(String name) { this.name = name; }
+
+    public String getName() { return name; }
+
+    public int getAge() { return age; }
+
+    public void setAge(int age) { this.age = age; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Employee employee = (Employee) o;
+        return age == employee.age &&
+                Objects.equals(name, employee.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, age);
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+} 
+```
+
+Nhưng với `lombok` ta chỉ cần `import lombok.Data;` và viết như sau: 
+
+```java
+import lombok.Data;
+
+@Data
+public class Employee {
+    private String name;
+    private int age;
+}
+```
+
+`@Data` sẽ có tác dụng generate ra `Construtor` theo yêu cầu, toàn bộ `Get/Set`, hàm `equals`, `hashCode`, `toString()`.
+
+Khi đánh dấu 1 class là `@Data` thì ta có thể sử dụng các function đã generate ra mà không cần phải code thêm 1 dòng nào.
+
+### Tự động generate constructor với `@NoArgsConstructor`, `@RequiredArgsConstructor`, `@AllArgsConstructor`
+
+Lombok hổ trợ 3 annotation định nghĩa constructor theo ý mình:
+
+- `@NoArgsConstructor`: Constructor rỗng.
+- `@AllArgsConstructor`: Constructor chứa tất cả thuộc tính.
+- `@RequiredArgsConstructor`: Constructor chỉ chứa các thuộc tính `final`
+
+Ví dụ:
+
+```java
+@RequiredArgsConstructor
+public class Employee{
+    private final String id;
+    private String name;
+    private int age;
+}
+```
+
+sẽ có Constructor
+
+```java
+public Employee(String id){
+    this.id = id;
+}
+```
+
+### Tự động generate các hàm Get/Set với `@Getter/@Setter`
+
+Khi chỉ muốn generate mỗi get/set thôi và không muốn dùng `@Data` vì nó quá nhiều chức năng thì có thể sử dụng `@Getter` và `@Setter`.
+
+```java
+@Getter
+@Setter
+public class Employee{
+    private String id;
+    private String name;
+}
+```
+
+Có thể chỉ xài cho 1 thuộc tính 
+
+```java
+public class Employee{
+    @Getter @Setter private String id;
+    @Setter(AccessLevel.PROTECTED) private String name;
+}
+```
+
+### Tự động generate hàm `toString()`, `equals()` và `hashCode()` với `@ToString` và `@EqualsAndHashCode`
+
+- `@ToString`: tạo ra hàm `toString()` từ thuộc tính class
+- `@EqualsAndHashCode`: tạo ra hàm `equals()` và `hashCode()`
+
+Nếu muốn hàm `toString()` hay `equals()` không tác động tới 1 thuộc tính nào đó thì ta dùng `Exclude`
+
+```java
+@ToString
+public class Employee{
+    private String id;
+    @ToString.Exclude private String name;
+}
+```
+
+### Tự động builder với `@Builder` 
+
+```java
+@Data
+@Builder
+public class Employee{
+    private String id;
+    private String name;
+}
+```
+
+sau đó 
+
+```java
+Employee vae = Employee.builder()
+                .id("001")
+                .name("Dang Huu Loc")
+                .build();
+```

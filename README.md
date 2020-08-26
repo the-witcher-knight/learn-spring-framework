@@ -1093,13 +1093,13 @@ Trong file `hello.html` tôi lấy giá trị của `name` trong `Model` ra bằ
 <h1 th:text="'Hello, ' + ${name}"></h1>
 ```
 
-## Giải thích cách Thymeleaf vận hành + Expression + Demo Full <a name="springboot_10></a>
+## Giải thích cách Thymeleaf vận hành + Expression + Demo Full <a name="springboot_10"></a>
 
 ### Giới thiệu cơ bản về Thymeleaf 
 
 **Thymeleaf** là một `Java Template Engine`. Có nhiệm vụ *xử lý và generate* ra các file HTML, XML, v.v..
 
-Các file HMTL do **Thymeleaf** tạo ra là nhờ kết hợp dữ liệu và template + quy tắc để sinh ra một file HTML chứa đầy đủ thông tin.
+Các file HTML do **Thymeleaf** tạo ra là nhờ kết hợp dữ liệu và template + quy tắc để sinh ra một file HTML chứa đầy đủ thông tin.
 
 Việc của bạn là cung cấp dữ liệu và quy định template như nào, còn việc dùng các thông tin đó để render ra HTML sẽ do **Thymeleaf** giải quyết.
 
@@ -1143,7 +1143,7 @@ Trong template **thymeleaf**, để lấy các thông tin trong `Model`. bạn s
 
 #### Ví dụ minh họa cho từng expression
 
-1. ${...} - variable expression
+1. ***${...} - variable expression***
 
 Đưa vào model một giá trị
 
@@ -1162,7 +1162,7 @@ model.addAttribute("today", "Monday");
 ctx.getVariable("today");
 ```
 
-2. *{...} - variable expression on selections
+2. ***{...} - variable expression on selections**
 
 Dấu `*` còn được gọi là asterisk syntax. Chức năng của nó giống với variable expression.
 
@@ -1189,7 +1189,7 @@ Vậy đoạn code trên tương đương với các sử dụng variable expres
 </div>
 ```
 
-3. #{...} - message expression
+3. ***#{...} - message expression***
 
 Ví dụ trong file config `.properties` có một messenger chào người dùng.
 
@@ -1205,7 +1205,7 @@ thì cách lấy nó ra nhanh nhất là:
 
 Đoạn text "xin chào các bạn" sẽ bị thay thế bới thymeleaf khi render `#{home.welcome}`
 
-4. @{...} - URL expression
+4. ***@{...} - URL expression***
 
 `@{...}` xử lý và trả ra giá trị URL theo context của máy chủ cho chúng ta.
 
