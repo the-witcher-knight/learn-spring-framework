@@ -1311,5 +1311,68 @@ Tẹo template `index.html`
 </html>
 ```
 
+Tiếp theo, ta tạo một class `Info` để lưu giữ thông tin (có sử dụng [Lombok](./DOC/Lombok.md) để viết cho nhanh)
+
+```java
+import lombok.Data;
+import lombok.AllArgsConstructor;
+
+@Data
+@AllArgsConstructor
+public class Info {
+    String key;
+    String value;
+}
+```
+
+Sau đó, tạo 1 `Constroller` để xử lý request tới `profile` 
+
+```java
+@GetMapping("/profile")
+    public String profile(Model model){
+        //Lưu thông tin vào list
+        List<Info> profile = new ArrayList<>();
+        profile.add(new Info("name", "Đặng Hữu Lộc"));
+        profile.add(new Info("age", "20"));
+        profile.add(new Info("Lover", "Yến nùn"));
+        
+        //lưu profile vào model
+        model.addAttribute(profile);
+        
+        //trả về template profile.html
+        return "profile";
+    }
+```
+
+Và tạo `template` để hiện thị các phần tử `profile`
+
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo</title>
+</head>
+<body>
+    <h1>Welcome to my website</h1>
+    <p>Thông tin cá nhân</p>
+    <br>
+    <ul>
+         <!-- Duyệt qua toàn bộ phần tử trong biến vaeProfile và gọi nó là info -->
+        <li th:each="info: ${vaeProfile}">
+            <!-- Với mọi phần tử lấy ra key, value-->
+            <span th:text="*{info.key}"></span>: <span th:text="*{info.value}"></span>
+        </li>
+    </ul>
+</body>
+</html>
+```
+
+Ở đây, ta đã sử dụng 2 expression là 
+
+- Variable expression (`${...}`): để lấy giá trị của biến `vaeProfile` trong `Model`
+- Variable expression on selection (`*{...}`): để lấy giá trị của biến `info`
+
+
 
 
