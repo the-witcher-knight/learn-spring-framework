@@ -16,7 +16,7 @@
 
 `Hibernate` là framework để lập trình viên Java có thể map các class (Pojo) với một cơ sở dữ liệu bất kì.
 
-Trước khi `Hibernate` ra đời, lập trình viên phải thao tác với database thông qua `JDBC`. Theo thời gian `JDBC` bộc lộ nhiều điểm yếu như:
+Trước khi `Hibernate` ra đời, lập trình viên phải thao tác với Database thông qua `JDBC`. Theo thời gian `JDBC` bộc lộ nhiều điểm yếu như:
 
 - Có nhiều code thừa mà chỉ mục đích lấy dữ liệu.
 - Mất nhiều thời gian map dữ liệu vào obj Java.
@@ -29,11 +29,11 @@ Vì thế, `Hibernate` ra đời.
 
 `Hibernate` là một thư viện `ORM` (Object Relational Mapping) open source giúp map các object (Pojo) với hệ quản trị cơ sở dữ liệu quan hệ và hổ trợ các khái niệm lập trình hướng đối tượng với cơ sở dữ liệu quan hệ.
 
-> `Hibernate` là layer trung gian giữa ứng dụng và database, ta sẽ giao tiếp với hibernate thay vì giao tiếp với database.
+> `Hibernate` là layer trung gian giữa ứng dụng và Database, ta sẽ giao tiếp với hibernate thay vì giao tiếp với Database.
 
 ![](../img/hibernate-architecture.png)
 
-Để giao tiếp với `Hibernate`, ta tạo 1 `class` đại diện cho 1 `table`. Và mọi dữ liệu của `table` trong database sẽ được bind vào `class` đó bởi `Hibernate`.
+Để giao tiếp với `Hibernate`, ta tạo 1 `class` đại diện cho 1 `table`. Và mọi dữ liệu của `table` trong Database sẽ được bind vào `class` đó bởi `Hibernate`.
 
 ## POJO - Plain Old Java Object <a name="pojo"></a>
 
@@ -79,7 +79,7 @@ public class UserModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Tự động tăng giá trị khi insert
     private Long id;
 
-    @Column(name = "email", unique = true) // trường email ở dưới đại diện cho cột email trong database
+    @Column(name = "email", unique = true) // trường email ở dưới đại diện cho cột email trong Database
     private String email; 
 
     @Column(name = "name")
@@ -106,7 +106,7 @@ public class UserModel {
 }
 ```
 
-Ví dụ lấy dữ liệu từ database
+Ví dụ lấy dữ liệu từ Database
 
 ```Java
 public List<User> findAll() {
@@ -114,13 +114,13 @@ public List<User> findAll() {
 }
 ```
 
-Như thế giúp tiết kiệm được rất nhiều thời gian cho việc `mapping` dữ liệu từ `database` sang `class` Java.
+Như thế giúp tiết kiệm được rất nhiều thời gian cho việc `mapping` dữ liệu từ `Database` sang `class` Java.
 
 ## Session <a name="session"></a>
 
 > Đối tượng chính của việc truy xuất hay insert dữ liệu bằng `Hibernate` chính là `session` và được tạo ra từ `Session Factory`.
 
-`Session Factory` là một interface giúp tạo ra `session` *kết nối* đến `database` bằng các *đọc* các cấu hình trong file `xml`, mỗi loại `database` sẽ có mỗi cấu hình khác nhau.
+`Session Factory` là một interface giúp tạo ra `session` *kết nối* đến `Database` bằng các *đọc* các cấu hình trong file `xml`, mỗi loại `Database` sẽ có mỗi cấu hình khác nhau.
 
 ## Hibernate Query Language <a name="hql"></a>
 

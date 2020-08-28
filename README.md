@@ -540,7 +540,7 @@ Tạo ra một interface `GirlRepository` để giao tiếp với DB.
 ```java
 public interface GirlRepository {
    /**
-   * Tìm kiếm một cô gái trong database theo tên
+   * Tìm kiếm một cô gái trong Database theo tên
    * @param name
    * @return
    */
@@ -556,7 +556,7 @@ public class GirlRepositoryImpl implements GirlRepository {
 
    @Override
    public Girl getGirlByName(String name) {
-      // Ở đây tôi ví dụ là database đã trả về
+      // Ở đây tôi ví dụ là Database đã trả về
       // một cô gái với tên đúng như tham số
 
       // Còn thực tế phải query trong csđl nhé.
@@ -581,7 +581,7 @@ public class GirlService {
       // Random 1 cái tên độ dài 10
       String name = randomGirlName(10);
 
-      // Gọi xuông tầng repository để query lấy một cô gái tên là "name" trong database
+      // Gọi xuông tầng repository để query lấy một cô gái tên là "name" trong Database
       return girlRepository.getGirlByName(name);
    }
 
@@ -794,7 +794,7 @@ Ngoài ra, về bản chất, `@Configuration` cũng là `@Component`. Nó chỉ
 
 > nếu một `Bean` có quá nhiều logic để khởi tạo và cấu hình, thì chúng ta sẽ sử dụng `@Configuration` và `@Bean` để tự tay tạo ra Bean. 
 
-### Ví dụ cấu hình kết nối database sử dụng `@Configuration` và `@Bean`
+### Ví dụ cấu hình kết nối Database sử dụng `@Configuration` và `@Bean`
 
 Đầu tiên, ta tạo 1 abstract class là `DatabaseConnector` để có thể phục vụ cho nhiều ngữ cảnh
 
@@ -944,7 +944,7 @@ logging.level.root=DEBUG
 
 Trong trường hợp, bạn muốn tự config những giá trị của riêng mình, thì Spring Boot hỗ trợ bạn với annotation `@Value`
 
-Ví dụ, tôi muốn cấu hình cho thông tin database của tôi từ bên ngoài ứng dụng
+Ví dụ, tôi muốn cấu hình cho thông tin Database của tôi từ bên ngoài ứng dụng
 
 ```
 loda.mysql.url=jdbc:mysql://host1:33060/loda
@@ -1538,42 +1538,173 @@ Tạo 1 template `success` để cho biết là đã tạo Todo thành công.
 
 ### Giới thiệu
 
-`Spring Boot JPA` là một phần trong hệ sinh thái Spring Data, nó tạo ra 1 layer giữa tầng `service` và `database`, giúp chúng ta thao tác với database một cách dễ dàng hơn, tự động config giảm thiểu code thừa.
+`Spring Boot JPA` là một phần trong hệ sinh thái Spring Data, nó tạo ra 1 layer giữa tầng `service` và `Database`, giúp chúng ta thao tác với Database một cách dễ dàng hơn, tự động config giảm thiểu code thừa.
 
 `Spring Boot JPA` đã wrapper Hibernate và tạo ra 1 Interface mạnh mẻ. Giúp giải quyết vần đề khi gặp khó khăn với Hibernate.
 
 Cài đặt dependency `Spring Boot JPA` vào project. [Xem thêm](https://spring.io/guides/gs/accessing-data-mysql/)
 
-Sao đó, vào `phpmmyadmin` tạo một database là `employee_manager` và 1 bảng `employee` như sau
+### Tạo Table, thêm user cho Table và viết thủ tục thêm dữ liệu vào table
+
+Vào `phpmmyadmin` tạo một Database là `employee_manager` và 1 bảng `employee` như sau
 
 ```SQL
-CREATE DATABASE employee_manager;
+CREATE Database employee_manager;
 use employee_manager;
 CREATE TABLE `employee`
 (
   `id`         bigint(20) NOT NULL      AUTO_INCREMENT,
-  `emname`   		text NULL          DEFAULT NULL,
-  `stamina`    int                  DEFAULT NULL,
-  `atk`      int                    DEFAULT NULL,
-  `def`      int                    DEFAULT NULL,
-  `agi`      int                    DEFAULT NULL,
+  `name`   		text  NULL          DEFAULT NULL,
+  `age`    int                  DEFAULT NULL,
+  `email`      text                    DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
 ```
 
-và thêm 1 thủ tục để fake nội dung trong bảng `employee` (chơi thôi)
+Tạo 1 `user` là `springuser` với `password` là `ThePassword` để quản lý csdl này. Sau đó, cung cấp tất cả các đặc quyền cho `springuser` trên Database `employee_manager`. 
 
-```SQL
-DELIMITER $$
-CREATE PROCEDURE generate_data()
-BEGIN
-  DECLARE i INT DEFAULT 0;
-  WHILE i < 100 DO
-    INSERT INTO `employee` (`emname`,`stamina`,`atk`,`def`,`agi`) VALUES (i,i,i,i,i);
-    SET i = i + 1;
-  END WHILE;
-END$$
-DELIMITER ;
-
-CALL generate_data();
+```MySql
+create user 'springuser'@'%' identified by 'ThePassword'; -- Creates the user
+grant all on employee_manager.* to 'springuser'@'%'; -- Gives all privileges to the new user on the newly created Database
 ```
+
+### Cấu hình kết nối MySql với Project
+
+Thêm `runtimeOnly 'mysql:mysql-connector-java'` vào dependencies trong `build.gradle`.
+
+Cấu hình trong file `application.properties`
+
+```properties
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=jdbc:mysql://${Witcher-Creator:localhost}:3308/db_example
+spring.datasource.username=springuser
+spring.datasource.password=
+```
+
+Ở đây, `spring.jpa.hibernate.ddl-auto` có thể là `none`, `update`, `create` hoặc `create-drop`. Xem thêm chi tiết tại [Hibernate document](https://docs.jboss.org/hibernate/orm/5.4/userguide/html_single/Hibernate_User_Guide.html#configurations-hbmddl).
+
+- `none`: mặc định cho `MySql`, không có thay đổi nào được thực hiện với cấu trúc Database.
+- `update`: `Hibernate` thay đổi Database theo cấu trúc thực thể đã cho.
+- `create`: tạo Database mọi lúc nhưng không drop khi đóng.
+- `create-drop`: tạo Database và xóa nó khi `SessionFactory` đóng.
+
+Khi chạy chương trình lần đầu tiên phải dùng `create` hoặc `update` bởi vì lúc này chưa có cấu trúc của Database. Có thể đổi sang `none` hoặc `update` ở những lần chạy tiếp theo. Sử dụng `update` khi muốn thay đổi cấu trúc của Database.
+
+Mặc định cho `H2` và các cơ sở dữ liệu nhúng khác là `create-drop`. Tuy nhiên, đối với những Database khác như `MySql` thì mặc định là `none`.
+
+> Kiểm tra port của MySql trên máy (3308) rồi điền vào sau localhost. Ở đây sử dụng Wampserver nên vào localhost trên wampserver kiểm tra port của MySql
+
+
+
+### Tạo Model Employee `@Entity`
+
+Khi đã có dữ liệu trong Database. Ta cần 1 class Java để mapping thông tin là `Employee`.
+
+```Java
+@Entity
+@Data
+@Table(name = "employee")
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
+    
+    // @Column(name="name") - có thể viết dòng này để mapping thông tin biến với cột trong Database
+    private String name;
+
+    // Nếu không đánh dấu column thì sẽ mapping tự động theo tên biến
+    private int age;
+    private String email;
+}
+```
+
+> Ở đây xài lombok nên không cần viết Get/Set, Constructor, hashCode(), equals() vì đã có `@Data`.
+
+`@Entity` để nói cho Spring Boot biết đây là 1 Entity.
+`@Table(name = "employee")` cho biết class này liên kết với bảng `employee` trong Database.
+
+### Tạo Repository 
+
+Mặc dù `Hibernate` đã làm rất tốt và giảm thiểu code cho việc thao tác với Database xuống rồi, những nó vẫn chưa hẳn là dễ dàng.
+
+Mục đích ban đầu của `Hibernate` là giúp người lập trình dễ sử dụng, tuy nhiên, trên thực tế, nhiều người gặp khó khăn trong việc sử dụng với `Hibernate` hơn cả `JDBC`.
+
+Nắm được vấn đề này, **Spring Data** đã wrapper lên `Hibernate` một lớp nữa gọi là `Spring JPA`, giúp cho mọi thao tác với Database của chúng ta rút ngắn xuống còn 1 dòng và tất nhiên là làm mờ `Hibernate` xuống đáng kể để tránh rắc rối cho người lập trình.
+
+#### JpaRepository
+
+Để sử dụng **Spring JPA** cần sử dụng interface `JpaRepository`.
+
+Với Inteface này, ta phải cung cấp 2 thông tin:
+
+1. Thực thể (Entity) - đối tượng tương ứng với Table trong Database.
+2. Kiểu dữ liệu của khóa chính (primary key).
+
+Tạo `EmployeeRepository` như sau:
+
+```Java
+@Repository
+public interface EmployeeRepository extends JpaRepository<Employee, Long>{
+}
+```
+
+`@Repository` đã đánh dấu `EmployeeRepository` là 1 Bean chịu trách nhiệm giao tiếp với Database.
+
+**Spring Boot** sẽ tự tìm thấy và khởi tạo ra đối tượng `UserRepository` trong `Context`. Việc tạo ra `UserRepository` hoàn toàn tự động và tự `config`, vì chúng ta đã kế thừa `JpaRepository`.
+
+`JpaRepository` kế thừa những phương thức từ  `PagingAndSortingRepository`, `CrudRepository`, `QueryByExampleExecutor`. 
+
+[Xem chi tiết các phương thức của JpaRepository](https://docs.spring.io/spring-data/data-jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html)
+
+### Tạo Constroller
+
+```Java
+@Controller
+@RequestMapping("/employee")
+public class WebConstroller {
+    @Autowired
+    EmployeeRepository employeeRepository;
+
+    @PostMapping("/addNew")
+    public @ResponseBody String addNewEmployee(@RequestParam String name, @RequestParam Integer age, @RequestParam String email){
+        Employee emp = new Employee();
+        emp.setAge(age);
+        emp.setName(name);
+        emp.setEmail(email);
+        employeeRepository.save(emp);
+
+        return "Add new employee success";
+    }
+
+    @GetMapping("/all")
+    public @ResponseBody Iterable<Employee> getAllEmployee(){
+        return employeeRepository.findAll();
+    }
+}
+```
+
+> Dùng postman để test phương thức này
+
+### Một vài thay đổi bảo mật
+
+Như trên chúng ta đã cấp tất cả quyền cho `springuser` với Database. Các hacker có thể dùng `SQL inject` để tấn công, xóa bảng hoặc gì đó. Vì vậy, khi hoàn thành ứng dụng chúng ta phải thu hồi tất cả quyền của `springuser` và chỉ cấp cho `springuser` các quyền `select`, `insert`, `delete` và `update`.
+
+Như sau:
+
+*xóa hết các quyền của `springuser`*
+
+```
+revoke all on employee_manager.* from 'springuser'@'%';
+```
+
+*cấp những quyền cơ bản*
+
+```
+grant select, insert, delete, update on db_example.* to 'springuser'@'%';
+```
+
+Khi muốn thay đổi Database:
+
+1. Regrant permissions;
+2. Change the spring.jpa.hibernate.ddl-auto to update.
+3. Re-run your applications.
