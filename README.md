@@ -1708,3 +1708,10 @@ Khi muốn thay đổi Database:
 1. Regrant permissions;
 2. Change the spring.jpa.hibernate.ddl-auto to update.
 3. Re-run your applications.
+
+### Những diều ví dụ trên còn thiếu và lưu ý
+
+1. Thiếu layer Service
+2. Thiếu tính lỏng lẽo - cần xem kỉ các class có annotation `@Service`, `@Repository` thiếu những annotaion này không xài `@Autowire` được.
+3. Kiểu dữ liệu `id` trong `Entity` phải giống với kiểu dữ liệu `id` trong `Repository`.  
+4. Dùng thêm `@ResponseBody` để không bị lỗi `thymeleaf` không tìm thấy template.
