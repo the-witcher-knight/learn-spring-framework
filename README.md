@@ -6,6 +6,8 @@
 
 [Code Java nhanh sử dụng Lombok](./DOC/Lombok.md)
 
+[Java Hibernate](./DOC/Hibernate.md)
+
 ------------------
 table of contents
 
@@ -47,7 +49,9 @@ Spring boot
 
 10. [Giải thích cách Thymeleaf vận hành + Expression + Demo Full](#springboot_10)
 
+11. [Spring Boot @RequestMapping, @PostMapping, @ModelAttribute, @RequestParam và web to-do với Thymeleaf](#springboot_11)
 
+12. [Spring Boot JPA và MySql](#springboot_12)
 
 ------------------
 
@@ -1093,7 +1097,7 @@ Trong file `hello.html` tôi lấy giá trị của `name` trong `Model` ra bằ
 <h1 th:text="'Hello, ' + ${name}"></h1>
 ```
 
-## Giải thích cách Thymeleaf vận hành + Expression + Demo Full <a name="springboot_10"></a>
+## Giải thích cách Thymeleaf vận hành, Expression và ví dụ minh họa <a name="springboot_10"></a>
 
 ### Giới thiệu cơ bản về Thymeleaf 
 
@@ -1373,6 +1377,203 @@ Và tạo `template` để hiện thị các phần tử `profile`
 - Variable expression (`${...}`): để lấy giá trị của biến `vaeProfile` trong `Model`
 - Variable expression on selection (`*{...}`): để lấy giá trị của biến `info`
 
+## Spring Boot @RequestMapping, @PostMapping, @ModelAttribute, @RequestParam và web to-do với Thymeleaf <a name="springboot_11"></a>
+
+### Kiến thức căn bản
+
+`@PostMapping` có nhiệm vụ đánh dấu hàm xử lý `POST` request trong Constroller. Cách sử dụng tương tự như `@GetMapping`.
+
+Trong trường hợp muốn tất cả các method dùng chung một cách xử lý thì có thể dùng `@RequestMapping`.
+
+`@RequestMapping` là một annotation có ý nghĩa và mục đích sử dụng rộng hơn các loại annotation như `@GetMapping`, `@PostMapping`,...
+
+`@RequestParam` dùng để đánh dấu 1 biến là request param trong request gửi lên server. Nó gán dữ liệu của param-name tương ứng vào biến.
+
+`@ModelAttribute` là một chú thích liên kết với một số phương pháp hay phương pháp giá trị trả về một thuộc tính mô hình tên và sau đó hiển thị nó cho một trang web xem.
+Cách hoạt động tương tự như `@RequestParameter` khi chúng ta chỉ nhận được một tham số và gán giá trị cho một số trường. Chỉ khác là `@ModelAttribution` chứa tất cả dữ liệu biểu mẫu thay vì một tham số duy nhất. Nó tạo ra một `bean` cho bạn chứa dữ liệu được gửi bởi nhà phát triển sau này.
 
 
+Ví dụ: cách sử dụng của `@RequestMapping`
 
+```java
+@Constroller
+@RequestMapping("api/v1")
+public class WebConstroller{
+
+   // path lúc này là /api/v1/addTodo và method GET
+   @RequestMapping(value="/addTodo", method=RequestMethod.GET)
+   public String addTodo(Model model){
+      return "addTodo";
+   }
+
+   // path lúc này là /api/v1/addTodo và method POST
+   @RequestMapping(value="/addTodo", method=RequestMethod.POST)
+   public String addTodo(@ModelAttribute Todo todo){
+      return "success";
+   }
+}
+```
+
+nếu không chỉ định method cho `@RequestMapping` nó sẽ tự động nhận tất cả các method.
+
+### Ví dụ minh họa Web ToDo
+
+Trong ví dụ này ta sử dụng 3 class Java: `App`, `Todo`, `WebConstroller` và 4 template HTML: `index`, `addTodo`, `listTodo`, `success`.
+
+Tạo template `index`
+
+```HTML
+
+```
+
+Ta sẽ tạo một `Model` là `Todo` để thể hiện thông tin.
+
+```java
+import lombok.Data;
+
+@Data
+public class Todo {
+    public String title;
+    public String detail;
+}
+```
+
+Tiếp theo, ta sẽ sử dụng đường dẫn `/listTodo` và method `GET` để lấy ra danh sách những việc cần làm.
+
+```java
+@Controller
+public class WebController {
+    // Tạm sử dụng List vì chưa có Database
+    List<Todo> todoList = new CopyOnWriteArrayList<>();
+
+    @GetMapping("/listTodo")
+    public String index(
+        @RequestParam(value = "limit", required = false) Integer limit, 
+       Model model){
+           //Nếu gửi dùng gửi lên tham số limit thì thêm subList của todoList vào Model
+           model.addAttribute("todoList", limit != null ? todoList.subList(0,limit) : todoList);
+
+           return "listTodo";
+    }
+}
+```
+
+Tiếp theo, ta sẽ làm template `listTodo`
+
+```HTML
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>To do</title>
+</head>
+<body>
+<h1 style="text-align: center">Danh sách công việc</h1>
+
+    <div class="container px-5">
+        <ul>
+           <li th:each="todo: ${todoList}">
+               <span th:text="*{todo.getTitle()}"></span>: <span th:text="*{todo.getDetail()}"></span>
+           </li>
+        </ul>
+
+        <a th:href="@{/addTodo}" class="btn btn-primary">+ Thêm công việc</a>
+    </div>
+</body>
+</html>
+```
+
+`GET/addTodo` để trả về webpage cho người dùng nhập thông tin công việc và thêm vào danh sách việc cần làm. 
+
+```Java
+@GetMapping("/addTodo")
+    public String addTodo(Model model){
+        model.addAttribute("todo", new Todo());
+        return "addTodo";
+    }
+```
+
+Và làm 1 template để user nhập công việc vào
+
+```HTML
+<h1 style="text-align: center">Thêm công việc</h1>
+
+<div class="container px-5">
+    <form th:action="@{/addTodo}" th:object="${todo}" method="post">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" class="form-control" id="title" th:field="*{title}">
+        </div>
+        <div class="form-group">
+            <label for="detail">Detail</label>
+            <input type="text" class="form-control" id="detail" th:field="*{detail}">
+        </div>
+        <button type="submit" class="btn btn-success">Thêm</button>
+    </form>
+</div>
+```
+
+Ở đây, tôi gắn vào 1 `Model` đối tượng `Todo`.
+
+Trong form, chúng ta lấy ra đối tượng Todo chỉ định bởi `th:object="${todo}"` và gán thông tin người dùng vào `Todo` bằng cú pháp `th:field="*{tên_thuộc_tính}"`. 
+
+Bấm `button` thì `Form` gửi request `POST` có chứa `Todo` lên path `/addTodo`
+
+Tiếp theo, ta viết `Constroller` xử lý `POST/addTodo` thêm công việc vào List.
+
+```Java
+// @ModelAttribute đánh dấu đối tượng Todo được gửi lên bởi Form Request đã được chỉ định bởi /// th:object="${todo}"
+
+@PostMapping("/addTodo")
+    public String addTodo(@ModelAttribute Todo todo){
+        todoList.add(todo);
+
+        return "success";
+    }
+```
+
+Tạo 1 template `success` để cho biết là đã tạo Todo thành công.
+
+## Spring Boot JPA và MySql <a name="springboot_12"></a>
+
+### Giới thiệu
+
+`Spring Boot JPA` là một phần trong hệ sinh thái Spring Data, nó tạo ra 1 layer giữa tầng `service` và `database`, giúp chúng ta thao tác với database một cách dễ dàng hơn, tự động config giảm thiểu code thừa.
+
+`Spring Boot JPA` đã wrapper Hibernate và tạo ra 1 Interface mạnh mẻ. Giúp giải quyết vần đề khi gặp khó khăn với Hibernate.
+
+Cài đặt dependency `Spring Boot JPA` vào project. [Xem thêm](https://spring.io/guides/gs/accessing-data-mysql/)
+
+Sao đó, vào `phpmmyadmin` tạo một database là `employee_manager` và 1 bảng `employee` như sau
+
+```SQL
+CREATE DATABASE employee_manager;
+use employee_manager;
+CREATE TABLE `employee`
+(
+  `id`         bigint(20) NOT NULL      AUTO_INCREMENT,
+  `emname`   		text NULL          DEFAULT NULL,
+  `stamina`    int                  DEFAULT NULL,
+  `atk`      int                    DEFAULT NULL,
+  `def`      int                    DEFAULT NULL,
+  `agi`      int                    DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+```
+
+và thêm 1 thủ tục để fake nội dung trong bảng `employee` (chơi thôi)
+
+```SQL
+DELIMITER $$
+CREATE PROCEDURE generate_data()
+BEGIN
+  DECLARE i INT DEFAULT 0;
+  WHILE i < 100 DO
+    INSERT INTO `employee` (`emname`,`stamina`,`atk`,`def`,`agi`) VALUES (i,i,i,i,i);
+    SET i = i + 1;
+  END WHILE;
+END$$
+DELIMITER ;
+
+CALL generate_data();
+```
