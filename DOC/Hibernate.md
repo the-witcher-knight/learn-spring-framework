@@ -12,6 +12,8 @@
 
 5. [Hibernate Query Language (HQL)](#hql)
 
+6. [JPQL và Criteria API](#jpql)
+
 -------------------------------------------
 
 `Hibernate` là framework để lập trình viên Java có thể map các class (Pojo) với một cơ sở dữ liệu bất kì.
@@ -125,3 +127,21 @@ Như thế giúp tiết kiệm được rất nhiều thời gian cho việc `ma
 ## Hibernate Query Language <a name="hql"></a>
 
 [Xem thêm](https://hibernate.org/)
+
+## JPQL và Criteria API
+
+`JPA Criteria API` cho phép tạo ra các câu truy vấn bằng `Java Object` thay vì việc khai báo trong `String` (`JPQL`).
+
+```Java
+SELECT o from OFFICE o
+```
+
+dùng `Criteria API` sẽ trông như thế này.
+
+```JAVA
+CriteriaBuilder cb = em.getCriteriaBuilder();
+
+CriteriaQuery<Office> q = cb.createQuery(Office.class);
+Root<Office> c = q.from(Office.class);
+q.select(c);
+```

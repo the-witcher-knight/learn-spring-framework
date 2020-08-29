@@ -9,9 +9,7 @@
 [Java Hibernate](./DOC/Hibernate.md)
 
 ------------------
-table of contents
-
-Spring boot
+*table of contents*
 
 1. [Các khái niệm cần nắm](#spring_other)
 
@@ -51,7 +49,15 @@ Spring boot
 
 11. [Spring Boot @RequestMapping, @PostMapping, @ModelAttribute, @RequestParam và web to-do với Thymeleaf](#springboot_11)
 
-12. [Spring Boot JPA và MySql](#springboot_12)
+12. [Spring Boot JPA, MySql, annotation @Query](#springboot_12)
+   12.1. Giới thiệu
+   12.2. [Cấu hình kết nối](#connection_config)
+   12.3. [Query Creation](#query_creation)
+   12.4. [Quy tắc đặt tên Method trong **Spring JPA**](#method_namingrules)
+   12.5. [Cách sử dụng @Query](#annotation_query)
+   
+
+
 
 ------------------
 
@@ -1534,7 +1540,7 @@ Tiếp theo, ta viết `Constroller` xử lý `POST/addTodo` thêm công việc 
 
 Tạo 1 template `success` để cho biết là đã tạo Todo thành công.
 
-## Spring Boot JPA và MySql <a name="springboot_12"></a>
+## Spring Boot JPA, MySql, annotation @Query <a name="springboot_12"></a>
 
 ### Giới thiệu
 
@@ -1568,7 +1574,7 @@ create user 'springuser'@'%' identified by 'ThePassword'; -- Creates the user
 grant all on employee_manager.* to 'springuser'@'%'; -- Gives all privileges to the new user on the newly created Database
 ```
 
-### Cấu hình kết nối MySql với Project
+### Cấu hình kết nối MySql với Project <a name="connection_config"></a>
 
 Thêm `runtimeOnly 'mysql:mysql-connector-java'` vào dependencies trong `build.gradle`.
 
@@ -1685,7 +1691,7 @@ public class WebConstroller {
 
 > Khi chạy lần đầu tiên, `Database` sẽ có thêm 1 bảng là `hibernate_sequence` lưu giá trị tiếp theo của `employee_id`, nếu không có sẽ không tự động generate id được.
 
-### Một vài thay đổi bảo mật
+#### Một vài thay đổi bảo mật
 
 Như trên chúng ta đã cấp tất cả quyền cho `springuser` với Database. Các hacker có thể dùng `SQL inject` để tấn công, xóa bảng hoặc gì đó. Vì vậy, khi hoàn thành ứng dụng chúng ta phải thu hồi tất cả quyền của `springuser` và chỉ cấp cho `springuser` các quyền `select`, `insert`, `delete` và `update`.
 
@@ -1709,10 +1715,102 @@ Khi muốn thay đổi Database:
 2. Change the spring.jpa.hibernate.ddl-auto to update.
 3. Re-run your applications.
 
-### Những diều ví dụ trên còn thiếu và lưu ý
+#### Những diều ví dụ trên còn thiếu và lưu ý
 
 1. Thiếu layer Service
 2. Thiếu tính lỏng lẽo - cần xem kỉ các class có annotation `@Service`, `@Repository` thiếu những annotaion này không xài `@Autowire` được.
 3. Kiểu dữ liệu `id` trong `Entity` phải giống với kiểu dữ liệu `id` trong `Repository`.  
 4. Dùng thêm `@ResponseBody` để không bị lỗi `thymeleaf` không tìm thấy template.
 
+### Query creation <a name="query_creation"></a>
+
+Trong **Spring JPA** có một cơ chế giúp ta tạo ra các câu query mà không cần viết thêm code.
+
+Ví dụ, khi ta đặt tên phương thức là `findByName(String name)` thì **Spring JPA** sẽ tự định nghĩa câu `Query` cho `method` này, bằng cách xử lý tên `method`. Vậy là chúng ta đã có thể truy vấn dữ liệu mà chỉ mất thêm 1 dòng code.
+
+*EmployeeRepository*
+
+```JAVA
+@Repository
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+    //Spring JPA sẽ tự định nghĩa câu query cho method này
+    public Employee findByName(String name); 
+}
+```
+
+*WebConstroller*
+```JAVA
+@GetMapping("/findByName")
+    public @ResponseBody Employee findByName(@RequestParam String name){
+        return repository.findByName(name);//sử dụng được ngay
+    }
+```
+
+### Quy tắc đặt tên cho method trong Spring JPA <a name="method_namingrules"></a>
+
+Trong **Spring JPA**, cơ chế xây dựng truy vấn thông qua tên của `method` được quy định bởi các tiền tố sau:
+
+`find…By`, `read…By`, `query…By`, `count…By`, và `get…By`.
+
+phần còn lại sẽ được `parse` theo tên của thuộc tính (viết hoa chữ cái đầu). Nếu chúng ta có nhiều điều kiện, thì các thuộc tính có thể kết hợp với nhau bằng chữ And hoặc Or.
+
+```JAVA
+@Repository
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+    //rút gọn
+    public Employee findByName(String name); 
+    //đầy đủ
+    public Employee findEmployeeByName(String name); 
+
+    //Kết hợp nhiều thuộc tính 
+    public Employee findByNameAndAge(String name, String age);
+
+    //Tìm kiếm không phân biệt hoa thường (ignorecase)
+    public Employee findByNameIgnoreCase(String name);
+    //Tìm kiếm không phân biệt hoa thường cho tất cả thuộc tính (all ignore case)
+    public Employee findByNameAndEmailAllIgnoreCase(String name, String email);
+
+    //Sắp xếp thứa tự trả về (order by) - có 2 kiểu asc và desc như trong sql
+    //Tìm kiếm những nhân viên có cùng tuổi và sắp xếp Id từ thấp đến cao
+    public Iterable<Employee> findByAgeOrderByIdAsc(String age);
+    //-----id từ cao xuống thấp
+    public Iterable<Employee> findByAgeOrderByIdDesc(String age);
+}
+```
+
+Các thuộc tính trong tên method phải thuộc về Class đó, nếu không sẽ gây ra lỗi. Tuy nhiên, trong một số trường hợp bạn có thể query bằng thuộc tính con.
+
+Ví dụ:
+
+Đói tượng Employee có thuộc tính là Address và trong Address lại có ZipCode
+
+```Java
+// person.address.zipCode
+List<Employee> findByAddressZipCode(ZipCode zipCode);
+```
+
+### Cách sử dụng @Query
+
+**Spring JPA** còn hổ trợ sử dụng những cấu truy vấn [JPQL(Hibernate)](./DOC/Hibernate#jpdl) hoặc `raw SQL` bằng cách dùng `@Query`
+
+```Java
+    //Dùng JPQL
+    @Query("Select e from Employee e Where e.id=?1")
+    public Employee findEmployeeById(Long id);
+    
+    //Dùng nativeQuery
+    @Query(value = "Select * from Employee e Where e.id=?1", nativeQuery = true)
+    public Employee findEmployeeById(Long id);
+```
+
+Cách truyền tham số là gọi theo thứ tự tham số bên dưới `?1`, `?2`, `?3`,... ngoài ra, có thể đặt tên cho tham số 
+
+```Java
+    //Dùng JPQL
+    @Query("Select e from Employee e Where e.id=:id")
+    public Employee findEmployeeById(@Param("id") Long id);
+    
+    //Dùng nativeQuery
+    @Query(value = "Select * from Employee e Where e.id=:id", nativeQuery = true)
+    public Employee findEmployeeById(@Param("id") Long id);
+```
