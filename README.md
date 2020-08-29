@@ -1576,7 +1576,7 @@ Cấu hình trong file `application.properties`
 
 ```properties
 spring.jpa.hibernate.ddl-auto=update
-spring.datasource.url=jdbc:mysql://${Witcher-Creator:localhost}:3308/db_example
+spring.datasource.url=jdbc:mysql://${Witcher-Creator:localhost}:3308/employee_manager
 spring.datasource.username=springuser
 spring.datasource.password=
 ```
@@ -1683,7 +1683,7 @@ public class WebConstroller {
 }
 ```
 
-> Dùng postman để test phương thức này
+> Khi chạy lần đầu tiên, `Database` sẽ có thêm 1 bảng là `hibernate_sequence` lưu giá trị tiếp theo của `employee_id`, nếu không có sẽ không tự động generate id được.
 
 ### Một vài thay đổi bảo mật
 
@@ -1715,3 +1715,4 @@ Khi muốn thay đổi Database:
 2. Thiếu tính lỏng lẽo - cần xem kỉ các class có annotation `@Service`, `@Repository` thiếu những annotaion này không xài `@Autowire` được.
 3. Kiểu dữ liệu `id` trong `Entity` phải giống với kiểu dữ liệu `id` trong `Repository`.  
 4. Dùng thêm `@ResponseBody` để không bị lỗi `thymeleaf` không tìm thấy template.
+
