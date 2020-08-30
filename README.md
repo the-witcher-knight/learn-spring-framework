@@ -56,7 +56,7 @@
    12.4. [Quy tắc đặt tên Method trong **Spring JPA**](#method_namingrules)
    12.5. [Cách sử dụng @Query](#annotation_query)
    
-
+13. [Ví dụ Spring JPA + MySql với mô hình MVC](#springboot_13)
 
 
 ------------------
@@ -1770,6 +1770,15 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     //Tìm kiếm không phân biệt hoa thường cho tất cả thuộc tính (all ignore case)
     public Employee findByNameAndEmailAllIgnoreCase(String name, String email);
 
+    //Tìm kiếm nhân viên có thuộc tính Id trong khoảng [start, end]
+    public List<Employee> findAllByIdBetween(Long start, Long end);
+    //Tìm kiếm nhân viên có thuộc tính Id lớn hơn ngưỡng (threshold, /infty)
+    public List<Employee> findAllByIdGreateThan(Long threshold);
+    public List<Employee> findAllByIdGreaterThanEqual(Long threshold); //[threshold, /infty)
+
+    //Tìm kiếm nhân viên có thuộc tính Id bé hơn ngưỡng (0, threshold]
+    public List<Employee> findAllByIdLessThanEqual(Long threshold);
+    
     //Sắp xếp thứa tự trả về (order by) - có 2 kiểu asc và desc như trong sql
     //Tìm kiếm những nhân viên có cùng tuổi và sắp xếp Id từ thấp đến cao
     public Iterable<Employee> findByAgeOrderByIdAsc(String age);
@@ -1777,6 +1786,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     public Iterable<Employee> findByAgeOrderByIdDesc(String age);
 }
 ```
+
+[Xem thêm tại đây](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#reference)
 
 Các thuộc tính trong tên method phải thuộc về Class đó, nếu không sẽ gây ra lỗi. Tuy nhiên, trong một số trường hợp bạn có thể query bằng thuộc tính con.
 
@@ -1814,3 +1825,168 @@ Cách truyền tham số là gọi theo thứ tự tham số bên dưới `?1`, 
     @Query(value = "Select * from Employee e Where e.id=:id", nativeQuery = true)
     public Employee findEmployeeById(@Param("id") Long id);
 ```
+
+### Ví dụ Spring JPA + MySql với mô hình MVC <a name="springboot_13"></a>
+
+Gồm có các thư mục: `config`, `controller`, `model`, `repository`, và `service`. 
+
+#### Tạo Model 
+
+*model/Employee*
+```Java
+@Entity
+@Data
+@Table(name = "employee")
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String name;
+    private Integer age;
+    private String email;
+}
+```
+
+*model/EmployeeValidator* - để kiểm tra xem Employee có hợp lệ hay không
+```Java
+import org.thymeleaf.util.StringUtils;
+import java.util.Optional;
+
+public class EmployeeValidator {
+    /**
+     * Kiểm tra Employee có hợp lệ hay không
+     * @Param employee
+     * @return 
+     */
+    public boolean isValid(Employee employee){
+        return Optional.ofNullable(employee)
+                        .filter(t -> !StringUtils.isEmpty(t.getName()))
+                        .filter(t -> !StringUtils.isEmpty(t.getAge().toString()))
+                        .isPresent();
+    }
+}
+```
+
+#### Tự tạo Bean EmployeeValidator bằng @Configuration và @Bean
+
+*config/EmployeeConfig*
+```Java
+@Configuration
+public class EmployeeConfig {
+    @Bean
+    public EmployeeValidator validator(){
+        return new EmployeeValidator();
+    }
+}
+```
+Code này sẽ tạo ra Bean `EmployeeValidator`.
+
+#### Tầng Repository
+
+*repository/EmployeeRepository*
+```Java
+@Repository
+public interface EmployeeRepository extends JpaRepository<Employee, Long>{
+    public List<Employee> findByAge(Integer age);
+
+    public void deleteById(Long id);
+}
+```
+
+#### Tầng Service
+
+*service/EmployeeService*
+```Java
+@Service
+public class EmployeeService {
+    @Autowired
+    private EmployeeRepository repository;
+
+    @Autowired
+    private EmployeeValidator validator;
+
+    /**
+     * Lấy ra danh sách List<Employee>
+     * @Param limit - Giới hạn số lượng lấy ra
+     * @Return trả về List<Employee> theo limit, nếu limit == null thì trả về findAll()
+     */
+    public List<Employee> findAll(Integer limit){
+        return Optional.ofNullable(limit)
+                    .map(value -> repository.findAll(PageRequest.of(0, value)).getContent())
+                    .orElseGet(() -> repository.findAll());
+    }
+
+    /**
+     * Thêm một nhân viên mới vào database
+     * @param employee
+     * @return về đối tượng Employee sau khi thêm vào DB, trả về null nếu không thành công
+     */
+    public Employee add(Employee employee){
+        if (validator.isValid(employee))
+            return repository.save(employee);
+        else
+            return null;
+    }
+
+    /**
+     *Tìm kiếm những nhân viên có cùng tuổi
+     * @param age
+     * @return danh sách nhân viên cùng tuổi
+     */
+    public List<Employee> findByAge(Integer age){
+        return repository.findByAge(age);
+    }
+
+    /**
+     * Xóa 1 nhân viên có id
+     * @param id
+     * @return danh sách nhân viên còn lại
+     */
+    public List<Employee> deleteById(Long id){
+        repository.deleteById(id);
+        return repository.findAll();
+    }
+}
+```
+
+#### Tầng Controller
+
+*controller/WebController*
+
+```Java
+@Controller
+@RequestMapping("/employee")
+public class WebController {
+    @Autowired
+    private EmployeeService service;
+
+    @GetMapping("/all")
+    public @ResponseBody List<Employee> findAll(@RequestParam Integer limit){
+        return service.findAll(limit);
+    }
+
+    @GetMapping("/find")
+    public @ResponseBody List<Employee> findByAge(@RequestParam Integer age){
+        return service.findByAge(age);
+    }
+
+    @PostMapping("/add")
+    public @ResponseBody Employee newEmployee(@RequestParam String name, @RequestParam Integer age, @RequestParam String email){
+        Employee employee = new Employee();
+        employee.setName(name);
+        employee.setAge(age);
+        employee.setEmail(email);
+
+        return service.add(employee);
+    }
+
+    @PostMapping("/delete")
+    public @ResponseBody List<Employee> delete(@RequestParam Long id){
+        return service.deleteById(id);
+    }
+}
+```
+
+
+
+
