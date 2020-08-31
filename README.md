@@ -2507,3 +2507,6 @@ public class JwtTokenProvider {
 - Tạo Controller 
 
 - Test Postman
+
+---------------------------------------------------
+Kết hợp Spring Boot + React + MySql được rồi. (dùng Jhipster cho ngon)
