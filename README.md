@@ -64,6 +64,10 @@
 
 15. [Exception Handling @ExceptionHandler + @RestControllerAdvice/@ControllerAdvice + @ResponseStatus](#springboot_15)
 
+16. [Spring Security](#springsecurity)
+    16.1. [Cơ bản](#springsecurity_basic)
+    16.2. [Spring Security và JPA Hibernate](#springsecurity_db)
+    16.3. [Spring Security + JWT + Hibernate](#springsecurity_advance)
 
 ------------------
 
@@ -2250,3 +2254,256 @@ Khi có exception, thay vì báo lổi hệ thống thì exception sẽ được
 `@ResponseStatus` là một cách định nghĩa `Http Status` trả về cho người dùng.
 
 > Nếu không muốn sử dụng `ResponseEntity` thì có thể dùng `@ResponseStatus` đánh dấu trên Object trả về.
+
+### Exception Handling cho ví dụ ở bài 13
+
+1. Tạo `Model ErrorMessage` để hiển 
+
+Tạo `ApiExceptionHandler` để xử lý `Exception` 
+
+```Java
+@RestControllerAdvice
+public class ApiExceptionHandler {
+    //Tất cả Exception sẽ được xử lý tại đây
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorMessage handleAllException(Exception ex, WebRequest webRequest){
+        return new ErrorMessage(10000, ex.getLocalizedMessage());
+    }
+
+    /**
+     * IndexOutOfBoundsException sẽ được xử lý riêng tại đây
+     */
+    @ExceptionHandler(IndexOutOfBoundsException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleIndexOutOfBounds(Exception ex, WebRequest webRequest){
+        return new ErrorMessage(10100, "Đối tượng không tồn tại");
+    }
+}
+```
+
+## Spring security <a name="springsecurity"></a>
+
+**Spring Security** là một trong những **core feature** quan trọng của **Spring Framework**, nó giúp chúng ta *phân quyền* và *xác thực* người dùng trước khi cho phép họ truy cập vào các tài nguyên của chúng ta.
+
+### Spring security cơ bản <a name="springsecurity_basic"></a>
+
+> Cài thêm dependencies Spring Security
+
+Để kích hoạt **Spring Security** cần phải gắn annotation `@EnableWebSecurity` trên 1 bean bất kì của mình.
+
+`WebSecurityConfigurerAdapter` là một `interface` tiện ích của **Spring Security** giúp chúng ta cài đặt các thông tin dễ dàng hơn.
+
+### Spring Security và JPA Hibernate <a name="springsecurity_db"></a>
+
+1. Tạo Database `user` và cấu hình kết nối Database `user`
+
+2. Tạo model `user`
+
+```Java
+@Entity
+@Data
+@Table(name = "user")
+public class User {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+    private String password;
+}
+```
+
+3. Tạo `repository`
+
+```Java
+public interface UserRepository extends JpaRepository<User, Long> {
+    public User findByUsername(String username);
+}
+```
+
+4. Tham chiếu `User` với `UserDetails`
+
+Mặc định **Spring Security** sử dụng một đối tượng `UserDetails` để chứa toàn bộ thông tin về người dùng. Vì vậy, chúng ta cần tạo ra một `class` mới giúp chuyển các thông tin của `User` thành `UserDetails`
+
+```Java
+@Data
+@AllArgsConstructor
+public class CustomUserDetails implements UserDetails {
+    User user;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Mặc định mình sẽ để tất cả là ROLE_USER. Để demo cho đơn giản.
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getPassword(){
+        return user.getPassword();
+    }
+
+    @Override
+    public String getUsername(){
+        return user.getUsername();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+}
+```
+Khi người dùng đăng nhập thì **Spring Security** sẽ cần lấy các thông tin `UserDetails` hiện có để kiểm tra. Vì vậy, cần tạo ra một class kế thừa lớp `UserDetailsService` mà **Spring Security** cung cấp để làm nhiệm vụ này.
+
+*UserService*
+
+```Java
+public class UserService implements UserDetailsService {
+    @Autowired
+    private UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username){
+        User user = userRepository.findByUsername(username);
+        if(user == null){
+            throw new UsernameNotFoundException(username);
+        }
+        return new CustomUserDetails(user);
+    }
+}
+```
+
+5. Cấu hình và phân quyền 
+
+Kích hoạt **Spring Security** và phân quyền người dùng
+
+```Java
+@EnableWebSecurity
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private UserService userService;
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth)
+            throws Exception {
+        auth.userDetailsService(userService) // Cung cáp userservice cho spring security
+                .passwordEncoder(passwordEncoder()); // cung cấp password encoder
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+                .antMatchers("/", "/home").permitAll() // Cho phép tất cả mọi người truy cập vào 2 địa chỉ này
+                .anyRequest().authenticated() // Tất cả các request khác đều cần phải xác thực mới được truy cập
+                .and()
+                .formLogin() // Cho phép người dùng xác thực bằng form login
+                .defaultSuccessUrl("/hello")
+                .permitAll() // Tất cả đều được truy cập vào địa chỉ này
+                .and()
+                .logout() // Cho phép logout
+                .permitAll();
+    }
+}
+```
+
+6. Tạo controller
+
+Mặc định `/login` và `/logout` Spring Security đã tạo cho chúng ta rồi.
+
+### Spring Security + JWT + Hibernate <a name="springsecurity_advance"></a>
+
+#### JSON Web Token
+
+`JWT (Json web Token)` là một chuỗi mã hóa được gửi kèm trong `Header` của `client request` có tác dụng giúp phía `server` xác thực request người dùng có hợp lệ hay không. Được sử dụng phổ biến trong các hệ thống API ngày nay.
+
+![](./img/jwt.png)
+
+#### Ví dụ minh họa
+
+Giống ví dụ trước nhưng có thêm thư viện 
+```Java
+// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
+compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.2'
+```
+
+- Làm 1 class `JwtTokenProvider` để mã hóa thông tin người dùng thành chuỗi `JWT`.
+
+*JwtTokenProvider*
+
+```Java
+@Component
+@Slf4j
+public class JwtTokenProvider {
+    //Đoạn JWT_SECRET này chỉ có server biết
+    private final String JWT_SECRET = "sieu_bi_mat";
+
+    //Thời gian có hiệu lực của chuỗi jwt
+    private final long JWT_EXPIRATION = 604800000L;
+
+    // Tạo ra jwt từ thông tin user
+    public String generateToken(CustomUserDetails userDetails) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
+        // Tạo chuỗi json web token từ id của user.
+        return Jwts.builder()
+                .setSubject(Long.toString(userDetails.getUser().getId()))
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
+                .compact();
+    }
+
+    // Lấy thông tin user từ jwt
+    public Long getUserIdFromJWT(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(JWT_SECRET)
+                .parseClaimsJws(token)
+                .getBody();
+
+        return Long.parseLong(claims.getSubject());
+    }
+
+    public boolean validateToken(String authToken) {
+        try {
+            Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(authToken);
+            return true;
+        } catch (MalformedJwtException ex) {
+            log.error("Invalid JWT token");
+        } catch (UnsupportedJwtException ex) {
+            log.error("Unsupported JWT token");
+        } catch (IllegalArgumentException ex) {
+            log.error("JWT claims string is empty.");
+        }//Thiếu kiếm tra quá hạn, xử lý sau
+        return false;
+    }
+}
+```
+
+- Cấu hình và phân quyền
+
+- Tạo Controller 
+
+- Test Postman
