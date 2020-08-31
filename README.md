@@ -58,6 +58,12 @@
    
 13. [Ví dụ Spring JPA + MySql với mô hình MVC](#springboot_13)
 
+14. [Restful API và `@RestController`, `@PathVariable`, `@RequestBody`](#springboot_14)
+
+    14.1. [Xây dựng Restful API cho EmployeeManager](#restful_api_employee_manager)
+
+15. [Exception Handling @ExceptionHandler + @RestControllerAdvice/@ControllerAdvice + @ResponseStatus](#springboot_15)
+
 
 ------------------
 
@@ -1826,11 +1832,11 @@ Cách truyền tham số là gọi theo thứ tự tham số bên dưới `?1`, 
     public Employee findEmployeeById(@Param("id") Long id);
 ```
 
-### Ví dụ Spring JPA + MySql với mô hình MVC <a name="springboot_13"></a>
+## Ví dụ Spring JPA + MySql với mô hình MVC <a name="springboot_13"></a>
 
 Gồm có các thư mục: `config`, `controller`, `model`, `repository`, và `service`. 
 
-#### Tạo Model 
+### Tạo Model 
 
 *model/Employee*
 ```Java
@@ -1867,7 +1873,7 @@ public class EmployeeValidator {
 }
 ```
 
-#### Tự tạo Bean EmployeeValidator bằng @Configuration và @Bean
+### Tự tạo Bean EmployeeValidator bằng @Configuration và @Bean
 
 *config/EmployeeConfig*
 ```Java
@@ -1881,7 +1887,7 @@ public class EmployeeConfig {
 ```
 Code này sẽ tạo ra Bean `EmployeeValidator`.
 
-#### Tầng Repository
+### Tầng Repository
 
 *repository/EmployeeRepository*
 ```Java
@@ -1893,7 +1899,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>{
 }
 ```
 
-#### Tầng Service
+### Tầng Service
 
 *service/EmployeeService*
 ```Java
@@ -1949,7 +1955,7 @@ public class EmployeeService {
 }
 ```
 
-#### Tầng Controller
+### Tầng Controller
 
 *controller/WebController*
 
@@ -1987,6 +1993,260 @@ public class WebController {
 }
 ```
 
+## Restful API và `@RestController`, `@PathVariable`, `@RequestBody`<a name="springboot_14"></a>
+
+### Annotation @RestController
+
+Khác với `@Controller` trả vế 1 template. `@RestController` trả về dữ liệu dạng `JSON`.
+
+Các đối tượng trả về dưới dạng Object sẽ được **Spring Boot** chuyển thành `JSON`.
+
+Các đối tượng trả về rất đa dạng, có thể trả về `List`, `Map`, v.v.. **Spring Boot** sẽ convert hết chúng thành `JSON`, mặc định sẽ dùng Jackson converter để làm điều đó.
+
+Nếu muốn API tùy biến được kiểu dữ liệu trả về, có thể trả về đối tượng `ResponseEntity` của **Spring** cung cấp. Đây là đối tượng cha của mọi `response` và sẽ *wrapper* các object trả về. 
+
+### Annotation @RequestBody
+
+Các thông tin từ phía **Client** gửi lên **Server** sẽ nằm trong `Body`, và cũng dưới dạng `JSON`.
+
+**Spring Boot** sẽ làm giúp chúng ta các phần nặng nhọc, nó chuyển chuỗi `JSON` trong request thành một Object Java. bạn chỉ cần cho nó biết cần chuyển JSON thành Object nào bằng Annotation `@RequestBody`
+
+### Annotation @PathVariable
+
+Giống như `@RequestParam`, `@PathVariable` được sử dụng để truy cập dữ liệu từ các request. Nhưng `@PathVariable` được sử dụng để lấy giá trị trên URI theo template (còn gọi là URI template).
+
+```Java
+@GetMapping("/employee/{id}")
+    public Todo getEmployee(@PathVariable(name = "id") Long id){
+       // @PathVariable lấy ra thông tin trong URL
+       // dựa vào tên của thuộc tính đã định nghĩa trong ngoặc kép /todo/{todoId}
+       return repository.findById(id);
+    }
+```
+
+> Ban đầu dùng `@RequestParam` để truyền giá trị vào rồi `send`. Nhưng bây giờ sẽ dùng những thứ phức tạp hơn.
+
+### Xây dựng Restful API cho EmployeeManager <a name="restful_api_employee_manager"></a>
+
+1. Chuẩn bị Spring project gổm : Spring Web + Lombok + Spring Jpa + MySql
+
+*build.gradle*
+```
+runtimeOnly 'mysql:mysql-connector-java'
+```
+
+2. Tạo Database employee_manager và cấu hình kết nối project
+
+*application.properties*
+```
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=jdbc:mysql://${Witcher-Creator:localhost}:3308/employee_manager
+spring.datasource.username=springuser
+spring.datasource.password=
+```
+
+3. Tạo `Model`
+
+*model/Employee*
+```Java
+@Entity
+@Data
+@Table(name = "employee")
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String name;
+    private Integer age;
+    private String email;
+}
+```
+
+4. Tạo `repository`
+
+*repository/EmployeeRepository*
+```Java
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+}
+```
+
+5. Tạo `service`
+
+Tạo `interface EmployeeService` *service/EmployeeService* khai báo các method cần sử dụng để CRUD Employee
+
+```Java
+public interface EmployeeService {
+    List<Employee> findAll();
+
+    Optional<Employee> findById(Long id);
+
+    void save(Employee employee);
+
+    void remove(Employee employee);
+}
+```
+
+Tạo `EmployeeServiceImpl` để implements `interface` vừa tạo *service/EmployeeServiceImpl*
+
+```Java
+@Service //đánh dấu để tự động autowired
+public class EmployeeServiceImpl implements EmployeeService {
+    @Autowired
+    private EmployeeRepository repository;
+
+    @Override
+    public List<Employee> findAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    public Optional<Employee> findById(Long id) {
+        return repository.findById(id);
+    }
+
+    @Override
+    public void save(Employee employee) {
+        repository.save(employee);
+    }
+
+    @Override
+    public void remove(Employee employee) {
+        repository.delete(employee);
+    }
+}
+```
+
+6. Tạo `controller`
+
+*controller/WebController*
+```Java
+@RestController
+@RequestMapping("/api")
+public class WebController {
+    @Autowired
+    private EmployeeService service;
+
+    /**
+     * lấy ra danh sách nhân viên
+     * @return ResponseEntity chứ danh sách nhân viên và http status
+     */
+    @GetMapping("/employee")
+    public ResponseEntity<List<Employee>> findAll(){
+        List<Employee> employeeList = service.findAll();
+        if (employeeList.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        else
+            return new ResponseEntity<>(employeeList, HttpStatus.OK);
+    }
+
+    /**
+     * Lấy ra thông tin nhân viên có id
+     * @param id
+     * @return ResponseEntity chứa thông tin nhân viên và http status ok
+     */
+    @GetMapping(path = "/employee/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Employee> findEmployeeById(@PathVariable("id") Long id){
+        Optional<Employee> employee = service.findById(id);
+        if(!employee.isPresent()){
+            return new ResponseEntity<>(employee.get(), HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(employee.get(), HttpStatus.OK);
+    }
+
+    /**
+     * Thêm một nhân viên mới vào Database
+     * @param employee
+     * @param builder
+     * @return ResponseEntity chứa thông tin nhân viên vừa tạo và http status created
+     */
+    @PostMapping(path = "/employee")
+    public ResponseEntity<Employee> createNewEmployee(@RequestBody Employee employee, UriComponentsBuilder builder){
+        service.save(employee);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(builder.path("/employee/{id}").buildAndExpand(employee.getId()).toUri());
+        return new ResponseEntity<>(employee, HttpStatus.CREATED);
+    }
+
+    /**
+     * Chỉnh sửa thông tin nhân viên trong danh sách
+     * @param id
+     * @param employee
+     * @return ResponseEntity chứa thông tin nhân viên vừa chình sửa và http status
+     */
+    @RequestMapping(value = "/employee/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<Employee> updateEmployee(@PathVariable("id") long id, @RequestBody Employee employee){
+        Optional<Employee> currentEmployee = service.findById(id);
+        if(!currentEmployee.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        currentEmployee.get().setName(employee.getName());
+        currentEmployee.get().setAge(employee.getAge());
+        currentEmployee.get().setEmail(employee.getEmail());
+
+        service.save(currentEmployee.get());
+        return new ResponseEntity<>(currentEmployee.get(), HttpStatus.OK);
+    }
+
+    /**
+     * Xóa một nhân viên có trong danh sách
+     * @param id
+     * @return ResponseEntity chứ http request no_content.
+     */
+    @RequestMapping(value = "/employee/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<Employee> deleteEmployee(@PathVariable("id") long id){
+        Optional<Employee> employee = service.findById(id);
+        if(!employee.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        service.remove(employee.get());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+}
+```
+
+7. Test nó bằng postman
+
+Thêm `Content-Type`: `application/json` vào **header** và chỉnh sửa **Body** theo request rồi `send`.
+
+Ví dụ: tạo mới employee `localhost:8080/api/employee` với method `POST` và `Body` chứa thông tin employee.
+
+```JSON
+{
+    "name": "Yến iu vấu",
+    "age": 19,
+    "email":"nhunnghichngom@example.com"
+}
+```
+
+xóa employee `localhost:8080/api/employee/{id-cần-xóa}` với method `DELETE`.
 
 
+## Exception Handling @ExceptionHandler + @RestControllerAdvice/@ControllerAdvice + @ResponseStatus <a name="springboot_15"></a>
 
+Cách xử lý exception trong **Spring Boot**.
+
+### Giới thiệu về @RestControllerAdvice & @ControllerAdvice + @ExceptionHandler
+
+`@RestControllerAdvice` là một Annotation gắn trên Class. Có tác dụng xen vào quá trình xử lý của các `@RestController`. Tương tự với `@ControllerAdvice`.
+
+`@RestControllerAdvice` thường được kết hợp với `@ExceptionHandler` để cắt ngang quá trình xử lý của Controller, và xử lý các ngoại lệ xảy ra.
+
+```Java
+@RestControllerAdvice
+public class ApiExceptionHandler {
+
+    @ExceptionHandler(IndexOutOfBoundsException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorMessage TodoException(Exception ex,  WebRequest request) {
+        return new ErrorMessage(10100, "Đối tượng không tồn tại");
+    }
+}
+```
+
+Khi có exception, thay vì báo lổi hệ thống thì exception sẽ được `@RestControllerAdvice` và `@ExceptionHandler` bắt lấy và xử lý
+
+### Giới thiệu @ResponseStatus
+
+`@ResponseStatus` là một cách định nghĩa `Http Status` trả về cho người dùng.
+
+> Nếu không muốn sử dụng `ResponseEntity` thì có thể dùng `@ResponseStatus` đánh dấu trên Object trả về.
