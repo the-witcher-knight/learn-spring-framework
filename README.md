@@ -50,10 +50,15 @@
 11. [Spring Boot @RequestMapping, @PostMapping, @ModelAttribute, @RequestParam và web to-do với Thymeleaf](#springboot_11)
 
 12. [Spring Boot JPA, MySql, annotation @Query](#springboot_12)
+
    12.1. Giới thiệu
+
    12.2. [Cấu hình kết nối](#connection_config)
+
    12.3. [Query Creation](#query_creation)
+
    12.4. [Quy tắc đặt tên Method trong **Spring JPA**](#method_namingrules)
+
    12.5. [Cách sử dụng @Query](#annotation_query)
    
 13. [Ví dụ Spring JPA + MySql với mô hình MVC](#springboot_13)
@@ -65,8 +70,11 @@
 15. [Exception Handling @ExceptionHandler + @RestControllerAdvice/@ControllerAdvice + @ResponseStatus](#springboot_15)
 
 16. [Spring Security](#springsecurity)
+
     16.1. [Cơ bản](#springsecurity_basic)
+
     16.2. [Spring Security và JPA Hibernate](#springsecurity_db)
+    
     16.3. [Spring Security + JWT + Hibernate](#springsecurity_advance)
 
 ------------------
