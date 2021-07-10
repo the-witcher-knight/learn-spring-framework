@@ -80,3 +80,5 @@ class Asynchronous implements Reader, CompletionHandler<Integer, ByteBuffer> {
     }
 }
 ```
+
+Phức tạp đúng không... thôi kệ nó.
