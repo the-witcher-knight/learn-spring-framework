@@ -8,7 +8,9 @@
 
 [Cơ bản về Reactor Project](./reactor-basic.md)
 
-[Tổng quan về Spring R2DBC](./spring-r2dbc.md)
+[Spring R2DBC support](./spring-r2dbc-support.md)
+
+[Spring R2DBC Repository](./spring-r2dbc-repository.md)
 
 # Tham khảo
 
