@@ -152,3 +152,61 @@ Chỉ có 3 loại `Integer`, `Void`, `Boolean`
 Chú thích `@Modifying` chỉ có có hiểu quả khi kết hợp với `@Query`
 
 ## Truy vấn với SpEL Expressions
+
+```Java
+@Query("SELECT * FROM person WHERE lastname = :#{[0]}")
+Flux<Person> findByQueryWithExpression(String lastname);
+```
+
+Hổ trợ biểu thức có thể mở rộng thông qua SPI truy vấn:
+`org.springframework.data.spel.spi.EvaluationContextExtension`. 
+
+## Truy vấn bằng Example
+
+Spring Date R2DBC cũng cho phép sử dụng Query By Example cho các truy vấn fashion.
+
+```Java
+// Tạo 1 đối tượng domain với tiêu chí (các trường rỗng sẽ bị bỏ qua)
+Employee employee = new Employee(); 
+employee.setName("Frodo");
+
+// Sử dụng  domain object, tạo 1 Example
+Example<Employee> example = Example.of(employee); 
+
+// thông qua R2dbcRepository, excute query()
+// findOne cho Mono
+Flux<Employee> employees = repository.findAll(example); 
+
+// do whatever with the flux
+```
+
+Ví dụ: truy vấn bằng cách sử dụng domain. Trong trường hợp này nó sẽ truy vấn dựa trên trường tên của `Employee`, các trường `null` bị bỏ qua.
+
+```Java
+Employee employee = new Employee();
+employee.setName("Yến");
+employee.setRole("ring bearer");
+
+// Tạo 1 custom `ExampleMatcher` để match tất cả các field (sử dụng matchAny()
+// để match bất kỳ trường nào)
+ExampleMatcher matcher = matching() 
+    .withMatcher("name", endsWith()) // Với name field, khớp với phần cuối của chương trình
+    .withIncludeNullValues()  // Match với tất cả các cột null (null này khác null trong csdl quan hệ)
+    .withIgnorePaths("role"); // bỏ qua trường này
+
+// Cắm  ExampleMatcher tùy chỉnh đầu dò
+Example<Employee> example = Example.of(employee, matcher); 
+
+Flux<Employee> employees = repository.findAll(example);
+
+// do whatever with the flux
+```
+
+Có thể dùng `withTransform()` đối với bất kỳ thuộc tính nào, cho phép chuyển đổi một thuộc tính trước khi hình thành truy vấn. 
+Ví dụ, có thể sử dụng `toUpperCase()` dựa trên chuỗi trước khi truy vấn được tạo.
+
+## Các tùy chọn để phát hiện xem một thực thể có phải là mới trong Spring Data hay không
+
+`@Id` - Property inspection(default): Nếu thuộc tính định danh là null hoặc 0 trong trường hợp là kiểu nguyên thủy, thì thực thể được giả định là mới. Nếu không, nó được cho là không mới.
+
+`@Version` - Property inspection: ...
